@@ -77,7 +77,7 @@ class _CortesState extends State<Cortes> {
       Navigator.pushReplacementNamed(context, '/captura');
       // Si NO quieres que regrese, usa pushReplacementNamed:
       // Navigator.pushReplacementNamed(context, '/captura');
-      // (pero entonces no habrá "atrás")
+      // (pero entonces no habrá "atráss")
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuario o contraseña incorrectos')),
