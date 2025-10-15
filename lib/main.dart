@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
 
-      // 🚩 Localizaciones: esto elimina "No MaterialLocalizations found"
+      // Localizaciones: esto elimina "No MaterialLocalizations found"
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
