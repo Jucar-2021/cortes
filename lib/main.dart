@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
-import 'loggin.dart';
+import 'captura.dart';
+import 'loggin.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +17,24 @@ class MyApp extends StatelessWidget {
       title: "Cortes Despachador",
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      home: Cortes(),
+
+      // 🚩 Localizaciones: esto elimina "No MaterialLocalizations found"
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'MX'),
+        Locale('es'),
+        Locale('en', 'US'),
+      ],
+
+      initialRoute: '/login',
+      routes: {
+        '/login': (_) => const Cortes(), // pantalla de inicio de sesión
+        '/captura': (_) => const Captura() // pantalla con el datepicker
+      },
     );
   }
 }
@@ -28,91 +47,102 @@ class Cortes extends StatefulWidget {
 }
 
 class _CortesState extends State<Cortes> {
-  TextEditingController usuario = TextEditingController();
-  TextEditingController pass = TextEditingController();
+  final TextEditingController usuario = TextEditingController();
+  final TextEditingController pass = TextEditingController();
 
-  //prueba de conexxion mediante el uso del metodo creado en db.dart
   late Future<void> consultabd;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     usuario.text = "";
     pass.text = "";
-    Db conn = Db();
+    final Db conn = Db();
     consultabd = conn.consultarBD();
   }
 
-  //consulta bd
+  @override
+  void dispose() {
+    usuario.dispose();
+    pass.dispose();
+    super.dispose();
+  }
+
+  Future<void> _iniciarSesion() async {
+    final ok = await consultarUsuario(usuario.text.trim(), pass.text.trim());
+    if (!mounted) return;
+
+    if (ok) {
+      // Usa pushNamed para poder regresar con el botón atrás si lo deseas
+      Navigator.pushNamed(context, '/captura');
+      // Si NO quieres que regrese, usa pushReplacementNamed:
+      // Navigator.pushReplacementNamed(context, '/captura');
+      // (pero entonces no habrá "atrás")
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuario o contraseña incorrectos')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
+        centerTitle: true,
         title: const Text(
-          "Inicio de Sesion",
+          "Inicio de Sesión",
           style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(
+            const Text(
               "Bienvenido al sistema de Cortes",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             TextField(
               maxLength: 10,
               controller: usuario,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Usuario',
                 hintText: 'Ingrese su usuario',
                 prefixIcon: Icon(Icons.person),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextField(
               maxLength: 10,
               controller: pass,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Contraseña',
                 hintText: 'Ingrese su contraseña',
                 prefixIcon: Icon(Icons.lock),
               ),
+              onSubmitted: (_) => _iniciarSesion(),
             ),
-            SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                bool inicioExitoso =
-                    await consultarUsuario(usuario.text, pass.text);
-                if (inicioExitoso) {
-                  // Navegar a la siguiente pantalla
-                  print("validacion correcta");
-                } else {
-                  // Mostrar mensaje de error
-                  print("validacion incorrecta");
-                }
-              },
-              child: Text('Iniciar Sesión', style: TextStyle(fontSize: 20)),
+              onPressed: _iniciarSesion,
+              child:
+                  const Text('Iniciar Sesión', style: TextStyle(fontSize: 20)),
             ),
             TextButton.icon(
               onPressed: () {
-                //aceptar pagina de crear usuario
+                // TODO: navegar a crear usuario si aplica
               },
-              label: Text('Crear Usuario',
+              icon: const Icon(Icons.person_add_alt_1,
+                  color: Colors.black, size: 30),
+              label: const Text('Crear Usuario',
                   style: TextStyle(fontSize: 20, color: Colors.black)),
-              icon: Icon(Icons.person_add_alt_1, color: Colors.black, size: 30),
-            )
+            ),
           ],
         ),
       ),
