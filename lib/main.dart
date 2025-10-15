@@ -74,7 +74,7 @@ class _CortesState extends State<Cortes> {
 
     if (ok) {
       // Usa pushNamed para poder regresar con el botón atrás si lo deseas
-      Navigator.pushNamed(context, '/captura');
+      Navigator.pushReplacementNamed(context, '/captura');
       // Si NO quieres que regrese, usa pushReplacementNamed:
       // Navigator.pushReplacementNamed(context, '/captura');
       // (pero entonces no habrá "atrás")
