@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
 import 'captura.dart';
-import 'loggin.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
+import 'loggin.dart';
+import 'registroUser.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (_) => const Cortes(), // pantalla de inicio de sesión
-        '/captura': (_) => const Captura() // pantalla con el datepicker
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/captura') {
+          final args = settings.arguments as String?;
+          return MaterialPageRoute(
+            builder: (_) => Captura(usuario: args ?? ''),
+          );
+        }
+        return null;
       },
     );
   }
@@ -73,11 +82,12 @@ class _CortesState extends State<Cortes> {
     if (!mounted) return;
 
     if (ok) {
-      // Usa pushNamed para poder regresar con el botón atrás si lo deseas
-      Navigator.pushReplacementNamed(context, '/captura');
-      // Si NO quieres que regrese, usa pushReplacementNamed:
-      // Navigator.pushReplacementNamed(context, '/captura');
-      // (pero entonces no habrá "atráss")
+      // Pasa el usuario autenticado a Captura
+      Navigator.pushReplacementNamed(
+        context,
+        '/captura',
+        arguments: usuario.text.trim(),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuario o contraseña incorrectos')),
@@ -96,7 +106,8 @@ class _CortesState extends State<Cortes> {
           style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.grey[200],
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -109,7 +120,9 @@ class _CortesState extends State<Cortes> {
               maxLength: 10,
               controller: usuario,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
                 labelText: 'Usuario',
                 hintText: 'Ingrese su usuario',
                 prefixIcon: Icon(Icons.person),
@@ -121,7 +134,9 @@ class _CortesState extends State<Cortes> {
               controller: pass,
               obscureText: true,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
                 labelText: 'Contraseña',
                 hintText: 'Ingrese su contraseña',
                 prefixIcon: Icon(Icons.lock),
@@ -137,10 +152,16 @@ class _CortesState extends State<Cortes> {
             TextButton.icon(
               onPressed: () {
                 // TODO: navegar a crear usuario si aplica
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Registro(),
+                  ),
+                );
               },
               icon: const Icon(Icons.person_add_alt_1,
                   color: Colors.black, size: 30),
-              label: const Text('Crear Usuario',
+              label: const Text('Registrar nuevo usuario',
                   style: TextStyle(fontSize: 20, color: Colors.black)),
             ),
           ],

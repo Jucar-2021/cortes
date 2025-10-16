@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Captura extends StatelessWidget {
-  const Captura({super.key});
+  final String usuario;
+  const Captura({super.key, required this.usuario});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +21,13 @@ class Ingreso extends StatefulWidget {
 class _IngresoState extends State<Ingreso> {
   final TextEditingController _fechaCtrl = TextEditingController();
   DateTime? _fechaSeleccionada;
+  late String user;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    user = widget.usuario;
+  }
 
   @override
   void dispose() {
@@ -56,6 +64,16 @@ class _IngresoState extends State<Ingreso> {
         title: const Text("Cortes Despachador",
             style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, size: 30),
+            tooltip: 'Cerrar sesión',
+            onPressed: () {
+              // Regresa a la pantalla de inicio de sesión
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
