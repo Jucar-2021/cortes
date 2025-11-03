@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'datosCorte.dart';
+
 class Captura extends StatelessWidget {
   final String usuario;
   const Captura({super.key, required this.usuario});
@@ -116,6 +118,15 @@ class _IngresoState extends State<Ingreso> {
                         content: Text('Selecciona una fecha primero')),
                   );
                   return;
+                } else {
+                  String fecha = _fechaSelec.text;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DatoCorte(
+                                fecha: fecha,
+                                user: user,
+                              )));
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Fecha: ${_fechaSelec.text}')),
