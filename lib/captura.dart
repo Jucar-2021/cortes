@@ -7,19 +7,19 @@ class Captura extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Ingreso();
+    return Ingreso(usuario: usuario);
   }
 }
 
 class Ingreso extends StatefulWidget {
-  const Ingreso({super.key});
-
+  const Ingreso({super.key, required this.usuario});
+  final String usuario;
   @override
   State<Ingreso> createState() => _IngresoState();
 }
 
 class _IngresoState extends State<Ingreso> {
-  final TextEditingController _fechaCtrl = TextEditingController();
+  final TextEditingController _fechaSelec = TextEditingController();
   DateTime? _fechaSeleccionada;
   late String user;
   @override
@@ -31,7 +31,7 @@ class _IngresoState extends State<Ingreso> {
 
   @override
   void dispose() {
-    _fechaCtrl.dispose();
+    _fechaSelec.dispose();
     super.dispose();
   }
 
@@ -51,7 +51,7 @@ class _IngresoState extends State<Ingreso> {
     if (fecha != null && mounted) {
       setState(() {
         _fechaSeleccionada = fecha;
-        _fechaCtrl.text = DateFormat('dd/MM/yyyy').format(fecha);
+        _fechaSelec.text = DateFormat('dd/MM/yyyy').format(fecha);
       });
     }
   }
@@ -61,8 +61,18 @@ class _IngresoState extends State<Ingreso> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
-        title: const Text("Cortes Despachador",
-            style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+        title: Column(
+          children: [
+            const Text(
+              "Cortes Despachador",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "Usuario: $user",
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -79,11 +89,11 @@ class _IngresoState extends State<Ingreso> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Text("Bienvenido a la pantalla de Ingreso",
+            const Text("Fecha del corte a capturar",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             TextField(
-              controller: _fechaCtrl,
+              controller: _fechaSelec,
               readOnly: true,
               decoration: InputDecoration(
                 labelText: 'Fecha',
@@ -108,7 +118,7 @@ class _IngresoState extends State<Ingreso> {
                   return;
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Fecha: ${_fechaCtrl.text}')),
+                  SnackBar(content: Text('Fecha: ${_fechaSelec.text}')),
                 );
               },
               child: const Text('Continuar'),
