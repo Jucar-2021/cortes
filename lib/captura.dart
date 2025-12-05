@@ -24,9 +24,9 @@ class _IngresoState extends State<Ingreso> {
   final TextEditingController _fechaSelec = TextEditingController();
   DateTime? _fechaSeleccionada;
   late String user;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     user = widget.usuario;
   }
@@ -44,10 +44,8 @@ class _IngresoState extends State<Ingreso> {
       initialDate: _fechaSeleccionada ?? hoy,
       firstDate: DateTime(hoy.year - 5),
       lastDate: DateTime(hoy.year + 5),
-      // Puedes dejar sin locale y tomará la del sistema.
-      // Si quieres forzar español y ya pusiste los delegados:
       locale: const Locale('es', 'MX'),
-      useRootNavigator: true, // ayuda cuando hay navegadores anidados
+      useRootNavigator: true,
     );
 
     if (fecha != null && mounted) {
@@ -64,6 +62,7 @@ class _IngresoState extends State<Ingreso> {
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
         title: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               "Cortes Despachador",
@@ -81,7 +80,6 @@ class _IngresoState extends State<Ingreso> {
             icon: const Icon(Icons.logout, size: 30),
             tooltip: 'Cerrar sesión',
             onPressed: () {
-              // Regresa a la pantalla de inicio de sesión
               Navigator.pushReplacementNamed(context, '/login');
             },
           ),
@@ -91,8 +89,10 @@ class _IngresoState extends State<Ingreso> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Text("Fecha del corte a capturar",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text(
+              "Fecha del corte a capturar",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 24),
             TextField(
               controller: _fechaSelec,
@@ -115,21 +115,27 @@ class _IngresoState extends State<Ingreso> {
                 if (_fechaSeleccionada == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text('Selecciona una fecha primero')),
+                      content: Text('Selecciona una fecha primero'),
+                    ),
                   );
                   return;
-                } else {
-                  String fecha = _fechaSelec.text;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DatoCorte(
-                                fecha: fecha,
-                                user: user,
-                              )));
                 }
+
+                String fecha = _fechaSelec.text;
+
+                // SnackBar opcional ANTES de navegar
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Fecha: ${_fechaSelec.text}')),
+                  SnackBar(content: Text('Fecha: $fecha')),
+                );
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DatoCorte(
+                      fecha: fecha,
+                      user: user,
+                    ),
+                  ),
                 );
               },
               child: const Text('Continuar'),
