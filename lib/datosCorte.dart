@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'bauchers_clientes/santander.dart';
 
 class DatoCorte extends StatefulWidget {
-  const DatoCorte({super.key, required this.fecha, required this.user});
+  const DatoCorte({
+    super.key,
+    required this.fecha,
+    required this.user,
+    required this.idUsuario, // 👈 nuevo
+  });
 
   final String fecha;
-  final String user;
+  final String user; // nombre/alias
+  final int idUsuario; // id numérico de BD
 
   @override
   State<DatoCorte> createState() => _DatoCorteState();
@@ -14,6 +20,7 @@ class DatoCorte extends StatefulWidget {
 class _DatoCorteState extends State<DatoCorte> {
   late String fecha;
   late String user;
+  late int idUsuario; // 👈 lo guardamos aquí
 
   late TextEditingController _ventaController;
   final TextEditingController _depositosController = TextEditingController();
@@ -32,11 +39,8 @@ class _DatoCorteState extends State<DatoCorte> {
     super.initState();
     fecha = widget.fecha;
     user = widget.user;
+    idUsuario = widget.idUsuario; // 👈 aquí
     _ventaController = TextEditingController();
-
-    // Si quisieras, puedes darle un valor inicial:
-    // _ventaController.text = "0";
-    // _recalcularTotal();
   }
 
   @override
@@ -73,14 +77,16 @@ class _DatoCorteState extends State<DatoCorte> {
   // ======== EDITAR (PENDIENTE DE IMPLEMENTAR) ========
 
   Future<void> _editarSantander() async {
-    // Cuando implementes:
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            SantanderBauchersPage(fecha: fecha, idUsuario: int.parse(user)),
+        builder: (_) => SantanderBauchersPage(
+          fecha: fecha,
+          idUsuario: idUsuario, // 👈 ahora le pasas el int, no user
+        ),
       ),
     );
+
     if (resultado != null) {
       setState(() {
         _totalSantander = resultado;
