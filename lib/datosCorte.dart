@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bauchers_clientes/santander.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({super.key, required this.fecha, required this.user});
@@ -73,8 +74,19 @@ class _DatoCorteState extends State<DatoCorte> {
 
   Future<void> _editarSantander() async {
     // Cuando implementes:
-    // final resultado = await Navigator.push<double>(...)
-    // if (resultado != null) { setState(() { _totalSantander = resultado; }); _recalcularTotal(); }
+    final resultado = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            SantanderBauchersPage(fecha: fecha, idUsuario: int.parse(user)),
+      ),
+    );
+    if (resultado != null) {
+      setState(() {
+        _totalSantander = resultado;
+      });
+      _recalcularTotal();
+    }
   }
 
   Future<void> _editarMifel() async {}

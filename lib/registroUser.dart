@@ -18,7 +18,7 @@ class NuevoUsuario extends StatefulWidget {
 }
 
 class _NuevoUsuarioState extends State<NuevoUsuario> {
-  final TextEditingController usuario = TextEditingController();
+  final TextEditingController usuarios = TextEditingController();
   final TextEditingController pass = TextEditingController();
 
   @override
@@ -26,7 +26,7 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
     // TODO: implement initState
 
     super.initState();
-    usuario.text = "";
+    usuarios.text = "";
     pass.text = "";
   }
 
@@ -51,7 +51,7 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
             ),
             TextField(
               maxLength: 10,
-              controller: usuario,
+              controller: usuarios,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -80,14 +80,14 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
               onPressed: () {
                 // TODO: Implementar lógica de registro
 
-                if (usuario.text.isEmpty || pass.text.isEmpty) {
+                if (usuarios.text.isEmpty || pass.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('Por favor, complete todos los campos')),
                   );
                   return;
                 }
-                registrarUsuario(usuario.text, pass.text).then((success) {
+                registrarUsuario(usuarios.text, pass.text).then((success) {
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

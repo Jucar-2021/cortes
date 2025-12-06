@@ -6,7 +6,7 @@ Future<bool> consultarUsuario(String usuario, String pass) async {
     Db db = Db();
     var conn = await db.connection;
     var results = await conn.query(
-      'SELECT * FROM Usuarios WHERE usuario = ? AND pass = ?',
+      'SELECT * FROM Usuarios WHERE usuarios = ? AND pass = ?',
       [usuario, pass],
     );
     if (results.isNotEmpty) {
@@ -27,7 +27,7 @@ Future<bool> registrarUsuario(String usuario, String pass) async {
     var conn = await db.connection;
     // Verificar si el usuario ya existe
     var checkResults = await conn.query(
-      'SELECT * FROM Usuarios WHERE usuario = ?',
+      'SELECT * FROM Usuarios WHERE usuarios = ?',
       [usuario],
     );
     if (checkResults.isNotEmpty) {
@@ -35,7 +35,7 @@ Future<bool> registrarUsuario(String usuario, String pass) async {
       return false;
     } else {
       var results = await conn.query(
-        'INSERT INTO Usuarios (usuario, pass) VALUES (?, ?)',
+        'INSERT INTO Usuarios (usuarios, pass) VALUES (?, ?)',
         [usuario, pass],
       );
       print('Usuario registrado con éxito. ID: ${results.insertId}');

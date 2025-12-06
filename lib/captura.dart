@@ -122,7 +122,7 @@ class _IngresoState extends State<Ingreso> {
                 }
 
                 String fecha = _fechaSelec.text;
-
+                print(fecha);
                 // SnackBar opcional ANTES de navegar
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Fecha: $fecha')),
