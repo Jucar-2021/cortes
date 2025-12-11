@@ -134,6 +134,7 @@ class _IngresoState extends State<Ingreso> {
                     builder: (context) => DatoCorte(
                       fecha: fecha,
                       user: user,
+                      idUsuario: int.parse(user),
                     ),
                   ),
                 );

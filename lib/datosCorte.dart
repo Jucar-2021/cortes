@@ -82,7 +82,7 @@ class _DatoCorteState extends State<DatoCorte> {
       MaterialPageRoute(
         builder: (_) => SantanderBauchersPage(
           fecha: fecha,
-          idUsuario: idUsuario, // 👈 ahora le pasas el int, no user
+          user: user, idUsuario: idUsuario, // 👈 ahora le pasas el int, no user
         ),
       ),
     );

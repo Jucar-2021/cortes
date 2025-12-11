@@ -22,7 +22,8 @@ class Db {
       }
       await conn.close();
     } catch (e) {
-      print('Error al consultar la base de datos: $e');
+      print(
+          'Error al consultar la base de datos>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: $e');
     }
   }
 
