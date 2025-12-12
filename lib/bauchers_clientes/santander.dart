@@ -7,9 +7,9 @@ class SantanderBauchersPage extends StatefulWidget {
 
   const SantanderBauchersPage({
     super.key,
-    required this.idUsuario,
     required this.fecha,
     required String user,
+    required this.idUsuario,
   });
 
   @override

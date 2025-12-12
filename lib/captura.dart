@@ -25,6 +25,8 @@ class _IngresoState extends State<Ingreso> {
   DateTime? _fechaSeleccionada;
   late String user;
 
+  get idUsuario => null;
+
   @override
   void initState() {
     super.initState();
@@ -134,7 +136,7 @@ class _IngresoState extends State<Ingreso> {
                     builder: (context) => DatoCorte(
                       fecha: fecha,
                       user: user,
-                      idUsuario: int.parse(user),
+                      idUsuario: 0, // 👈 pasa un valor entero predeterminado
                     ),
                   ),
                 );

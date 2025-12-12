@@ -6,7 +6,7 @@ class DatoCorte extends StatefulWidget {
     super.key,
     required this.fecha,
     required this.user,
-    required this.idUsuario, // 👈 nuevo
+    required this.idUsuario,
   });
 
   final String fecha;
@@ -20,7 +20,6 @@ class DatoCorte extends StatefulWidget {
 class _DatoCorteState extends State<DatoCorte> {
   late String fecha;
   late String user;
-  late int idUsuario; // 👈 lo guardamos aquí
 
   late TextEditingController _ventaController;
   final TextEditingController _depositosController = TextEditingController();
@@ -39,7 +38,7 @@ class _DatoCorteState extends State<DatoCorte> {
     super.initState();
     fecha = widget.fecha;
     user = widget.user;
-    idUsuario = widget.idUsuario; // 👈 aquí
+
     _ventaController = TextEditingController();
   }
 
@@ -82,7 +81,8 @@ class _DatoCorteState extends State<DatoCorte> {
       MaterialPageRoute(
         builder: (_) => SantanderBauchersPage(
           fecha: fecha,
-          user: user, idUsuario: idUsuario, // 👈 ahora le pasas el int, no user
+          user: user,
+          idUsuario: widget.idUsuario,
         ),
       ),
     );
