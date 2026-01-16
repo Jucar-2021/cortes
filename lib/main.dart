@@ -37,9 +37,16 @@ class MyApp extends StatelessWidget {
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/captura') {
-          final args = settings.arguments as String?;
+          final args = settings.arguments as Map<String, dynamic>?;
+
+          final usuario = args?['usuario'] as String? ?? '';
+          final idUsuario = args?['idUsuario'] as int? ?? 0;
+
           return MaterialPageRoute(
-            builder: (_) => Captura(usuario: args ?? ''),
+            builder: (_) => Captura(
+              usuario: usuario,
+              idUsuario: idUsuario,
+            ),
           );
         }
         return null;
@@ -78,20 +85,44 @@ class _CortesState extends State<Cortes> {
   }
 
   Future<void> _iniciarSesion() async {
-    final ok = await consultarUsuario(usuario.text.trim(), pass.text.trim());
+    final user = usuario.text.trim();
+    final pwd = pass.text.trim();
+
+    final idUsuario = await obtenerId(user, pwd);
     if (!mounted) return;
 
-    if (ok) {
-      // Pasa el usuario autenticado a Captura
+    if (idUsuario != -1) {
       Navigator.pushReplacementNamed(
         context,
         '/captura',
-        arguments: usuario.text.trim(),
+        arguments: {'usuario': user, 'idUsuario': idUsuario},
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuario o contraseña incorrectos')),
       );
+    }
+  }
+
+  // metodo pra consultar IdUsuario de la bd
+  Future<int> obtenerId(String usuario, String pass) async {
+    final db = Db();
+
+    try {
+      final conn = await db.connection;
+      final results = await conn.query(
+        'SELECT idUsuario FROM Usuarios WHERE usuarios = ? AND pass = ? LIMIT 1',
+        [usuario, pass],
+      );
+
+      await conn.close();
+
+      if (results.isEmpty) return -1;
+
+      return int.parse(results.first[0].toString());
+    } catch (e) {
+      print('Error login: $e');
+      return -1;
     }
   }
 
@@ -117,6 +148,7 @@ class _CortesState extends State<Cortes> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             TextField(
+              textInputAction: TextInputAction.next,
               maxLength: 10,
               controller: usuario,
               decoration: const InputDecoration(

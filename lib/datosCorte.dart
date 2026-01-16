@@ -20,6 +20,7 @@ class DatoCorte extends StatefulWidget {
 class _DatoCorteState extends State<DatoCorte> {
   late String fecha;
   late String user;
+  late int idUsuario;
 
   late TextEditingController _ventaController;
   final TextEditingController _depositosController = TextEditingController();
@@ -38,6 +39,7 @@ class _DatoCorteState extends State<DatoCorte> {
     super.initState();
     fecha = widget.fecha;
     user = widget.user;
+    idUsuario = widget.idUsuario;
 
     _ventaController = TextEditingController();
   }

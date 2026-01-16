@@ -187,6 +187,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
+                            textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: 'Baucher ${index + 1}',
                               border: const OutlineInputBorder(),

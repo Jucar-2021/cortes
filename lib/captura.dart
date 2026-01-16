@@ -5,17 +5,19 @@ import 'datosCorte.dart';
 
 class Captura extends StatelessWidget {
   final String usuario;
-  const Captura({super.key, required this.usuario});
+  final int idUsuario;
+  const Captura({super.key, required this.usuario, required this.idUsuario});
 
   @override
   Widget build(BuildContext context) {
-    return Ingreso(usuario: usuario);
+    return Ingreso(usuario: usuario, idUsuario: idUsuario);
   }
 }
 
 class Ingreso extends StatefulWidget {
-  const Ingreso({super.key, required this.usuario});
+  const Ingreso({super.key, required this.usuario, required this.idUsuario});
   final String usuario;
+  final int idUsuario;
   @override
   State<Ingreso> createState() => _IngresoState();
 }
@@ -25,12 +27,13 @@ class _IngresoState extends State<Ingreso> {
   DateTime? _fechaSeleccionada;
   late String user;
 
-  get idUsuario => null;
+  late int idUsuario;
 
   @override
   void initState() {
     super.initState();
     user = widget.usuario;
+    idUsuario = widget.idUsuario;
   }
 
   @override
@@ -97,6 +100,7 @@ class _IngresoState extends State<Ingreso> {
             ),
             const SizedBox(height: 24),
             TextField(
+              textInputAction: TextInputAction.next,
               controller: _fechaSelec,
               readOnly: true,
               decoration: InputDecoration(
@@ -136,7 +140,8 @@ class _IngresoState extends State<Ingreso> {
                     builder: (context) => DatoCorte(
                       fecha: fecha,
                       user: user,
-                      idUsuario: 0, // 👈 pasa un valor entero predeterminado
+                      idUsuario:
+                          idUsuario, // 👈 pasa un valor entero predeterminado
                     ),
                   ),
                 );

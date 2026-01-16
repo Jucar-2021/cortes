@@ -18,7 +18,7 @@ class Db {
       final conn = await connection;
       final results = await conn.query('SELECT * FROM Usuarios');
       for (var row in results) {
-        print('Usuario: ${row[1]}, Pass: ${row[2]}');
+        print('IdUsuario: ${row[0]}, Usuario: ${row[1]}, Pass: ${row[2]}');
       }
       await conn.close();
     } catch (e) {
