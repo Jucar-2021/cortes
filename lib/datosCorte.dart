@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bauchers_clientes/santander.dart';
+import 'bauchers_clientes/mifel.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -97,11 +98,65 @@ class _DatoCorteState extends State<DatoCorte> {
     }
   }
 
-  Future<void> _editarMifel() async {}
+  Future<void> _editarMifel() async {
+    final resultado = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MifelBauchersPage(
+          fecha: fecha,
+          user: user,
+          idUsuario: widget.idUsuario,
+        ),
+      ),
+    );
 
-  Future<void> _editarEfecticar() async {}
+    if (resultado != null) {
+      setState(() {
+        _totalMifel = resultado;
+      });
+      _recalcularTotal();
+    }
+  }
 
-  Future<void> _editarClientes() async {}
+  Future<void> _editarEfecticar() async {
+    final resultado = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MifelBauchersPage(
+          fecha: fecha,
+          user: user,
+          idUsuario: widget.idUsuario,
+        ),
+      ),
+    );
+
+    if (resultado != null) {
+      setState(() {
+        _totalEfecticar = resultado;
+      });
+      _recalcularTotal();
+    }
+  }
+
+  Future<void> _editarClientes() async {
+    final resultado = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MifelBauchersPage(
+          fecha: fecha,
+          user: user,
+          idUsuario: widget.idUsuario,
+        ),
+      ),
+    );
+
+    if (resultado != null) {
+      setState(() {
+        _totalClientes = resultado;
+      });
+      _recalcularTotal();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
