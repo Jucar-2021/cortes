@@ -65,6 +65,7 @@ class Cortes extends StatefulWidget {
 class _CortesState extends State<Cortes> {
   final TextEditingController usuario = TextEditingController();
   final TextEditingController pass = TextEditingController();
+  final TextEditingController claveAcceso = TextEditingController();
 
   late Future<void> consultabd;
 
@@ -73,6 +74,7 @@ class _CortesState extends State<Cortes> {
     super.initState();
     usuario.text = "";
     pass.text = "";
+    claveAcceso.text = "";
     final Db conn = Db();
     consultabd = conn.consultarBD();
   }
@@ -200,5 +202,15 @@ class _CortesState extends State<Cortes> {
         ),
       ),
     );
+  }
+
+  /// funcion para validar clave de acceso a pagina de registro
+
+  Future<bool> accesoPageRegistro(int claveAcceso) async {
+    if (claveAcceso == 2021) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

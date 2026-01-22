@@ -376,7 +376,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          'TOTAL SANTANDER: ${_fmt(_total)}',
+                          'TOTAL: ${_fmt(_total)}',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

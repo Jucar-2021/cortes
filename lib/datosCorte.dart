@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'bauchers_clientes/santander.dart';
 import 'bauchers_clientes/mifel.dart';
+import 'bauchers_clientes/efecticard.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -122,7 +123,7 @@ class _DatoCorteState extends State<DatoCorte> {
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
-        builder: (_) => MifelBauchersPage(
+        builder: (_) => EfecticarBauchersPage(
           fecha: fecha,
           user: user,
           idUsuario: widget.idUsuario,
