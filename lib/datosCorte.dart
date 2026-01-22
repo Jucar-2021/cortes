@@ -307,7 +307,7 @@ class _DatoCorteState extends State<DatoCorte> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                "TOTAL FINAL DEL CORTE: ${_fmt(totalFinal)}",
+                "Diferencia a entregar: ${_fmt(totalFinal)}",
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontSize: 22,
@@ -322,6 +322,30 @@ class _DatoCorteState extends State<DatoCorte> {
             ElevatedButton(
               onPressed: () {
                 // TODO guardar corte en BD
+                double venta = double.tryParse(_ventaController.text) ?? 0;
+                double santander = _totalSantander;
+                double mifel = _totalMifel;
+                double efecticar = _totalEfecticar;
+                double depositos =
+                    double.tryParse(_depositosController.text) ?? 0;
+                double buzon = double.tryParse(_buzonController.text) ?? 0;
+                double gastos = double.tryParse(_gastosController.text) ?? 0;
+                double clientes = _totalClientes;
+                double total = totalFinal;
+                _guardarCorte(
+                  fecha,
+                  idUsuario,
+                  user,
+                  venta,
+                  santander,
+                  mifel,
+                  efecticar,
+                  depositos,
+                  buzon,
+                  gastos,
+                  clientes,
+                  total,
+                );
               },
               child: const Text("Guardar Corte"),
             ),
@@ -329,5 +353,34 @@ class _DatoCorteState extends State<DatoCorte> {
         ),
       ),
     );
+  }
+
+  _guardarCorte(
+    String fecha,
+    int idUsuario,
+    String user,
+    double venta,
+    double santander,
+    double mifel,
+    double efecticar,
+    double depositos,
+    double buzon,
+    double gastos,
+    double clientes,
+    double total,
+  ) {
+    // Aquí va la lógica para guardar el corte en la base de datos
+    print('Corte guardado:');
+    print('Fecha: $fecha');
+    print('Usuario: $user (ID: $idUsuario)');
+    print('Venta: $venta');
+    print('Santander: $santander');
+    print('Mifel: $mifel');
+    print('Efecticar: $efecticar');
+    print('Depósitos: $depositos');
+    print('Buzón: $buzon');
+    print('Gastos: $gastos');
+    print('Clientes: $clientes');
+    print('Total final: $total');
   }
 }

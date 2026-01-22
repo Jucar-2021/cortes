@@ -291,7 +291,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Bauchers Santander',
+              'Bauchers Mifel',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text('idUsuario: ${widget.idUsuario}'),

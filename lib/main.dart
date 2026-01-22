@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
 import 'captura.dart';
-import 'loggin.dart';
 import 'registroUser.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
 
 void main() {
@@ -185,13 +184,29 @@ class _CortesState extends State<Cortes> {
             ),
             TextButton.icon(
               onPressed: () {
-                // TODO: navegar a crear usuario si aplica
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Registro(),
-                  ),
-                );
+                mostrarDialogoClaveAcceso(context).then((accesoConcedido) {
+                  if (accesoConcedido) {
+                    claveAcceso.clear();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Registro(),
+                      ),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Acceso concedido.'),
+                      ),
+                    );
+                  } else {
+                    claveAcceso.clear();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Acceso denegado. Clave incorrecta.'),
+                      ),
+                    );
+                  }
+                });
               },
               icon: const Icon(Icons.person_add_alt_1,
                   color: Colors.black, size: 30),
@@ -204,13 +219,42 @@ class _CortesState extends State<Cortes> {
     );
   }
 
-  /// funcion para validar clave de acceso a pagina de registro
-
-  Future<bool> accesoPageRegistro(int claveAcceso) async {
-    if (claveAcceso == 2021) {
-      return true;
-    } else {
-      return false;
-    }
+  // ventana emergente para solicitar clave de acceso al registrar usuario
+  Future<bool> mostrarDialogoClaveAcceso(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Clave de Acceso Requerida'),
+          content: TextField(
+            keyboardType: TextInputType.number,
+            controller: claveAcceso,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Ingrese la clave de acceso',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                final clave = int.tryParse(claveAcceso.text.trim()) ?? 0;
+                if (clave == 2021) {
+                  Navigator.of(context).pop(true);
+                } else {
+                  Navigator.of(context).pop(false);
+                }
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    ).then((value) => value ?? false);
   }
 }
