@@ -295,8 +295,6 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
               'Bauchers Santander',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text('idUsuario: ${widget.idUsuario}'),
-            Text('Fecha: ${widget.fecha}'),
           ],
         ),
         centerTitle: true,

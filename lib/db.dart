@@ -3,11 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Db {
   final settings = ConnectionSettings(
-    host: dotenv.env['DB_HOST']!,
-    port: int.parse(dotenv.env['DB_PORT']!),
-    user: dotenv.env['DB_USER']!,
-    password: dotenv.env['DB_PASS']!,
-    db: dotenv.env['DB_NAME']!,
+    host: dotenv.env['DB_HOST'] ?? '',
+    port: int.parse(dotenv.env['DB_PORT'] ?? '3306'),
+    user: dotenv.env['DB_USER'] ?? '',
+    password: dotenv.env['DB_PASS'] ?? '',
+    db: dotenv.env['DB_NAME'] ?? '',
   );
 
   Future<MySqlConnection> get connection async {
@@ -85,7 +85,28 @@ class Db {
 
     return results.map((row) {
       return {
-        'idEfecticar ': int.parse(row[0].toString()),
+        'idEfecticar': int.parse(row[0].toString()),
+        'importe': num.parse(row[1].toString()),
+      };
+    }).toList();
+  }
+
+  // Trae registros EFETICARD por usuario + fecha (para saber si existe y para eliminar por id)
+  Future<List<Map<String, dynamic>>> obtenerClientePorUsuarioFecha({
+    required int idUsuario,
+    required String fecha,
+  }) async {
+    final conn = await connection;
+    final results = await conn.query(
+      'SELECT idCliente, importe FROM Clientes WHERE idUsuario = ? AND fecha = ? ORDER BY idCliente ASC',
+      [idUsuario, fecha],
+    );
+
+    await conn.close();
+
+    return results.map((row) {
+      return {
+        'idCliente': int.parse(row[0].toString()),
         'importe': num.parse(row[1].toString()),
       };
     }).toList();
@@ -145,6 +166,24 @@ class Db {
     await conn.close();
   }
 
+  // Inserta varios bauchers (primer guardado)
+  Future<void> insertarCliente({
+    required int idUsuario,
+    required String fecha,
+    required List<double> importes,
+  }) async {
+    final conn = await connection;
+
+    for (final imp in importes) {
+      await conn.query(
+        'INSERT INTO Clientes (idUsuario, fecha, importe) VALUES (?, ?, ?)',
+        [idUsuario, fecha, imp],
+      );
+    }
+
+    await conn.close();
+  }
+
 // Elimina un registro específico
   Future<void> eliminarSantanderPorId(int idSantander) async {
     final conn = await connection;
@@ -169,6 +208,15 @@ class Db {
     await conn.query(
       'DELETE FROM Efecticar WHERE idEfecticar = ?',
       [idEfecticar],
+    );
+    await conn.close();
+  }
+
+  Future<void> eliminarClientePorId(int idCliente) async {
+    final conn = await connection;
+    await conn.query(
+      'DELETE FROM Clientes WHERE idCliente = ?',
+      [idCliente],
     );
     await conn.close();
   }
@@ -239,6 +287,30 @@ class Db {
     for (final imp in importes) {
       await conn.query(
         'INSERT INTO Efecticar (idUsuario, fecha, importe) VALUES (?, ?, ?)',
+        [idUsuario, fecha, imp],
+      );
+    }
+
+    await conn.close();
+  }
+
+  Future<void> reemplazarClientePorUsuarioFecha({
+    required int idUsuario,
+    required String fecha,
+    required List<double> importes,
+  }) async {
+    final conn = await connection;
+
+    // borrar todos los del día/usuario
+    await conn.query(
+      'DELETE FROM Clientes WHERE idUsuario = ? AND fecha = ?',
+      [idUsuario, fecha],
+    );
+
+    // insertar los nuevos
+    for (final imp in importes) {
+      await conn.query(
+        'INSERT INTO Clientes (idUsuario, fecha, importe) VALUES (?, ?, ?)',
         [idUsuario, fecha, imp],
       );
     }

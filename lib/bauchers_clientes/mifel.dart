@@ -294,8 +294,6 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
               'Bauchers Mifel',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text('idUsuario: ${widget.idUsuario}'),
-            Text('Fecha: ${widget.fecha}'),
           ],
         ),
         centerTitle: true,

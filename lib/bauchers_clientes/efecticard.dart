@@ -278,12 +278,17 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   @override
   Widget build(BuildContext context) {
     if (_errorCarga != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorCarga!)),
-        );
-      });
-      _errorCarga = null;
+      final msg = _errorCarga; // copia local
+
+      if (msg != null) {
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg)),
+          );
+        });
+        _errorCarga = null;
+      }
     }
 
     return Scaffold(
@@ -295,8 +300,6 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
               'Bauchers Efecticard',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text('idUsuario: ${widget.idUsuario}'),
-            Text('Fecha: ${widget.fecha}'),
           ],
         ),
         centerTitle: true,
