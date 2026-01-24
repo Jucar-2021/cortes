@@ -1,3 +1,4 @@
+import 'package:cortes/db.dart';
 import 'package:flutter/material.dart';
 import 'bauchers_clientes/santander.dart';
 import 'bauchers_clientes/mifel.dart';
@@ -12,8 +13,8 @@ class DatoCorte extends StatefulWidget {
   });
 
   final String fecha;
-  final String user; // nombre/alias
-  final int idUsuario; // id numérico de BD
+  final String user;
+  final int idUsuario;
 
   @override
   State<DatoCorte> createState() => _DatoCorteState();
@@ -33,8 +34,9 @@ class _DatoCorteState extends State<DatoCorte> {
   double _totalMifel = 0;
   double _totalEfecticar = 0;
   double _totalClientes = 0;
-
   double totalFinal = 0;
+
+  bool _guardando = false;
 
   @override
   void initState() {
@@ -55,12 +57,12 @@ class _DatoCorteState extends State<DatoCorte> {
     super.dispose();
   }
 
-  // ======== MÉTODO PARA RECALCULAR TOTAL ========
+  // ======== RECALCULAR TOTAL ========
   void _recalcularTotal() {
-    double venta = double.tryParse(_ventaController.text) ?? 0;
-    double dep = double.tryParse(_depositosController.text) ?? 0;
-    double buz = double.tryParse(_buzonController.text) ?? 0;
-    double gas = double.tryParse(_gastosController.text) ?? 0;
+    final venta = double.tryParse(_ventaController.text) ?? 0;
+    final dep = double.tryParse(_depositosController.text) ?? 0;
+    final buz = double.tryParse(_buzonController.text) ?? 0;
+    final gas = double.tryParse(_gastosController.text) ?? 0;
 
     setState(() {
       totalFinal = venta -
@@ -77,8 +79,7 @@ class _DatoCorteState extends State<DatoCorte> {
   // ======== FORMATO DINERO ========
   String _fmt(double valor) => '\$${valor.toStringAsFixed(2)}';
 
-  // ======== EDITAR (PENDIENTE DE IMPLEMENTAR) ========
-
+  // ======== NAVEGAR A PANTALLAS DE BAUCHERS ========
   Future<void> _editarSantander() async {
     final resultado = await Navigator.push<double>(
       context,
@@ -92,9 +93,7 @@ class _DatoCorteState extends State<DatoCorte> {
     );
 
     if (resultado != null) {
-      setState(() {
-        _totalSantander = resultado;
-      });
+      setState(() => _totalSantander = resultado);
       _recalcularTotal();
     }
   }
@@ -112,9 +111,7 @@ class _DatoCorteState extends State<DatoCorte> {
     );
 
     if (resultado != null) {
-      setState(() {
-        _totalMifel = resultado;
-      });
+      setState(() => _totalMifel = resultado);
       _recalcularTotal();
     }
   }
@@ -132,14 +129,14 @@ class _DatoCorteState extends State<DatoCorte> {
     );
 
     if (resultado != null) {
-      setState(() {
-        _totalEfecticar = resultado;
-      });
+      setState(() => _totalEfecticar = resultado);
       _recalcularTotal();
     }
   }
 
   Future<void> _editarClientes() async {
+    // OJO: aquí estabas mandando MifelBauchersPage también.
+    // Si tienes una pantalla de clientes, cámbiala.
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
@@ -152,11 +149,126 @@ class _DatoCorteState extends State<DatoCorte> {
     );
 
     if (resultado != null) {
-      setState(() {
-        _totalClientes = resultado;
-      });
+      setState(() => _totalClientes = resultado);
       _recalcularTotal();
     }
+  }
+
+  // ======== BOTÓN GUARDAR (CORRECTO) ========
+  Future<void> _onGuardarPressed() async {
+    if (_guardando) return;
+
+    final venta = double.tryParse(_ventaController.text) ?? 0;
+    final santander = _totalSantander;
+    final mifel = _totalMifel;
+    final efecticar = _totalEfecticar;
+    final depositos = double.tryParse(_depositosController.text) ?? 0;
+    final buzon = double.tryParse(_buzonController.text) ?? 0;
+    final gastos = double.tryParse(_gastosController.text) ?? 0;
+    final clientes = _totalClientes;
+    final total = totalFinal;
+
+    if (venta == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("La venta del día no puede ser cero.")),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _guardando = true);
+
+    try {
+      await _guardarCorte(
+        fecha,
+        idUsuario,
+        user,
+        venta,
+        santander,
+        mifel,
+        efecticar,
+        depositos,
+        buzon,
+        gastos,
+        clientes,
+        total,
+      );
+
+      if (!mounted) return;
+      setState(() => _guardando = false);
+
+      Navigator.pop(context); // ✅ solo al terminar
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _guardando = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error al guardar el corte: $e")),
+      );
+    }
+  }
+
+  // ======== OVERLAY GUARDANDO ========
+  Widget _overlayGuardando() {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withOpacity(0.25),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: 14),
+                Text(
+                  'Guardando tu corte $user ...',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ======== GUARDAR CORTE EN BD ========
+  Future<void> _guardarCorte(
+    String fecha,
+    int idUsuario,
+    String user,
+    double venta,
+    double santander,
+    double mifel,
+    double efecticar,
+    double depositos,
+    double buzon,
+    double gastos,
+    double clientes,
+    double total,
+  ) async {
+    final db = Db();
+
+    await db.insertarCorte(
+      fecha: fecha,
+      idUsuario: idUsuario,
+      usuario: user,
+      venta: venta,
+      santander: santander,
+      mifel: mifel,
+      efecticar: efecticar,
+      depositos: depositos,
+      buzon: buzon,
+      gastos: gastos,
+      clientes: clientes,
+      efectivoEntregado: total,
+    );
   }
 
   @override
@@ -177,210 +289,144 @@ class _DatoCorteState extends State<DatoCorte> {
         centerTitle: true,
       ),
 
-      // ================= CUERPO ====================
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // VENTA DEL DÍA
-            const Text("Venta del día",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Row(
+      // ✅ IMPORTANTE: Stack para overlay
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _ventaController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: "Venta del día",
-                      border: OutlineInputBorder(),
+                const Text("Venta del día",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                TextField(
+                  controller: _ventaController,
+                  enabled: !_guardando,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: "Venta del día",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (_) => _recalcularTotal(),
+                ),
+                const SizedBox(height: 20),
+                const Text("Tarjetas",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Card(
+                  child: ListTile(
+                    title: const Text("Santander"),
+                    subtitle: Text(_fmt(_totalSantander)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: _guardando ? null : _editarSantander,
                     ),
-                    onChanged: (_) =>
-                        _recalcularTotal(), // 👈 recalcula al escribir
                   ),
                 ),
-                const SizedBox(width: 8),
+                Card(
+                  child: ListTile(
+                    title: const Text("Mifel"),
+                    subtitle: Text(_fmt(_totalMifel)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: _guardando ? null : _editarMifel,
+                    ),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    title: const Text("Efecticar"),
+                    subtitle: Text(_fmt(_totalEfecticar)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: _guardando ? null : _editarEfecticar,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text("Otros movimientos",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                TextField(
+                  controller: _depositosController,
+                  enabled: !_guardando,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: "Depósitos Cajero",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (_) => _recalcularTotal(),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _buzonController,
+                  enabled: !_guardando,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: "Buzón",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (_) => _recalcularTotal(),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _gastosController,
+                  enabled: !_guardando,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: "Gastos",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (_) => _recalcularTotal(),
+                ),
+                const SizedBox(height: 20),
+                const Text("Clientes",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Card(
+                  child: ListTile(
+                    title: const Text("Total clientes"),
+                    subtitle: Text(_fmt(_totalClientes)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: _guardando ? null : _editarClientes,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    "Diferencia a entregar: ${_fmt(totalFinal)}",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _guardando ? null : _onGuardarPressed,
+                  child: const Text("Guardar Corte"),
+                ),
+                const SizedBox(height: 30),
               ],
             ),
-
-            const SizedBox(height: 20),
-
-            // TARJETAS
-            const Text("Tarjetas",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Card(
-              child: ListTile(
-                title: const Text("Santander"),
-                subtitle: Text(_fmt(_totalSantander)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: _editarSantander,
-                ),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                title: const Text("Mifel"),
-                subtitle: Text(_fmt(_totalMifel)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: _editarMifel,
-                ),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                title: const Text("Efecticar"),
-                subtitle: Text(_fmt(_totalEfecticar)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: _editarEfecticar,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // OTROS MOVIMIENTOS
-            const Text("Otros movimientos",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _depositosController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: "Depósitos Cajero",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => _recalcularTotal(), // 👈 recalcula al escribir
-            ),
-            const SizedBox(height: 10),
-
-            TextField(
-              controller: _buzonController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: "Buzón",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => _recalcularTotal(), // 👈 recalcula al escribir
-            ),
-            const SizedBox(height: 10),
-
-            TextField(
-              controller: _gastosController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: "Gastos",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => _recalcularTotal(), // 👈 recalcula al escribir
-            ),
-
-            const SizedBox(height: 20),
-
-            // CLIENTES
-            const Text("Clientes",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Card(
-              child: ListTile(
-                title: const Text("Total clientes"),
-                subtitle: Text(_fmt(_totalClientes)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: _editarClientes,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // =============== TOTAL FINAL ==================
-            Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                "Diferencia a entregar: ${_fmt(totalFinal)}",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // BOTÓN GUARDAR CORTE
-            ElevatedButton(
-              onPressed: () {
-                // TODO guardar corte en BD
-                double venta = double.tryParse(_ventaController.text) ?? 0;
-                double santander = _totalSantander;
-                double mifel = _totalMifel;
-                double efecticar = _totalEfecticar;
-                double depositos =
-                    double.tryParse(_depositosController.text) ?? 0;
-                double buzon = double.tryParse(_buzonController.text) ?? 0;
-                double gastos = double.tryParse(_gastosController.text) ?? 0;
-                double clientes = _totalClientes;
-                double total = totalFinal;
-                _guardarCorte(
-                  fecha,
-                  idUsuario,
-                  user,
-                  venta,
-                  santander,
-                  mifel,
-                  efecticar,
-                  depositos,
-                  buzon,
-                  gastos,
-                  clientes,
-                  total,
-                );
-              },
-              child: const Text("Guardar Corte"),
-            ),
-          ],
-        ),
+          ),
+          if (_guardando) _overlayGuardando(),
+        ],
       ),
     );
-  }
-
-  _guardarCorte(
-    String fecha,
-    int idUsuario,
-    String user,
-    double venta,
-    double santander,
-    double mifel,
-    double efecticar,
-    double depositos,
-    double buzon,
-    double gastos,
-    double clientes,
-    double total,
-  ) {
-    // Aquí va la lógica para guardar el corte en la base de datos
-    print('Corte guardado:');
-    print('Fecha: $fecha');
-    print('Usuario: $user (ID: $idUsuario)');
-    print('Venta: $venta');
-    print('Santander: $santander');
-    print('Mifel: $mifel');
-    print('Efecticar: $efecticar');
-    print('Depósitos: $depositos');
-    print('Buzón: $buzon');
-    print('Gastos: $gastos');
-    print('Clientes: $clientes');
-    print('Total final: $total');
   }
 }

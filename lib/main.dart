@@ -3,8 +3,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
 import 'captura.dart';
 import 'registroUser.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("ERROR cargando .env: $e");
+    // No detenemos la app
+  }
   runApp(const MyApp());
 }
 
@@ -29,7 +37,7 @@ class MyApp extends StatelessWidget {
         Locale('es'),
         Locale('en', 'US'),
       ],
-
+      home: const Cortes(),
       initialRoute: '/login',
       routes: {
         '/login': (_) => const Cortes(), // pantalla de inicio de sesión

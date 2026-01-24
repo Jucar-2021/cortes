@@ -1,12 +1,13 @@
 import 'package:mysql1/mysql1.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Db {
   final settings = ConnectionSettings(
-    host: 'mysql-carlos08.alwaysdata.net',
-    port: 3306,
-    user: 'carlos08',
-    password: 'carlos.1992',
-    db: 'carlos08_cortes',
+    host: dotenv.env['DB_HOST']!,
+    port: int.parse(dotenv.env['DB_PORT']!),
+    user: dotenv.env['DB_USER']!,
+    password: dotenv.env['DB_PASS']!,
+    db: dotenv.env['DB_NAME']!,
   );
 
   Future<MySqlConnection> get connection async {
@@ -243,5 +244,46 @@ class Db {
     }
 
     await conn.close();
+  }
+
+  Future<void> insertarCorte({
+    required String fecha,
+    required int idUsuario,
+    required String usuario,
+    required double venta,
+    required double santander,
+    required double mifel,
+    required double efecticar,
+    required double depositos,
+    required double buzon,
+    required double gastos,
+    required double clientes,
+    required double efectivoEntregado,
+  }) async {
+    final conn = await connection;
+
+    try {
+      await conn.query(
+        'INSERT INTO Corte (fecha, idUsuario, usuario, venta, santander, mifel, efecticar, depositos, buzon, gastos, clientes, efectivoEntregado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          fecha,
+          idUsuario,
+          usuario,
+          venta,
+          santander,
+          mifel,
+          efecticar,
+          depositos,
+          buzon,
+          gastos,
+          clientes,
+          efectivoEntregado
+        ],
+      );
+
+      await conn.close();
+    } catch (e) {
+      print('Error al insertar corte: $e');
+    }
   }
 }
