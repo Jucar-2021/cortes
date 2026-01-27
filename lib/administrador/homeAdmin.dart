@@ -1,3 +1,4 @@
+import 'package:cortes/administrador/registroUser.dart';
 import 'package:flutter/material.dart';
 
 class HomeAdmin extends StatelessWidget {
@@ -14,13 +15,19 @@ class HomeAdmin extends StatelessWidget {
       ),
       body: Container(
         color: Colors.yellow[100],
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(100),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              "Bienvenido al Panel de Administrador",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const Registro()));
+              },
+              child: const Text(
+                "Registrar Nuevo Usuario",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
