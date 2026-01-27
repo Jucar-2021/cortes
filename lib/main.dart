@@ -1,8 +1,9 @@
+import 'package:cortes/administrador/homeAdmin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
 import 'captura.dart';
-import 'registroUser.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
+import 'administrador/registroUser.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
@@ -199,7 +200,7 @@ class _CortesState extends State<Cortes> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const Registro(),
+                        builder: (context) => const HomeAdmin(),
                       ),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -219,7 +220,7 @@ class _CortesState extends State<Cortes> {
               },
               icon: const Icon(Icons.person_add_alt_1,
                   color: Colors.black, size: 30),
-              label: const Text('Registrar nuevo usuario',
+              label: const Text('opciones de administrador',
                   style: TextStyle(fontSize: 20, color: Colors.black)),
             ),
           ],

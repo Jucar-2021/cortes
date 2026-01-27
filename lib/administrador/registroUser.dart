@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'loggin.dart'; // para usar registrarUsuario
+import '../loggin.dart'; // para usar registrarUsuario
 
 class Registro extends StatelessWidget {
   const Registro({super.key});
