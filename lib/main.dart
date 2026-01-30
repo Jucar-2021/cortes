@@ -177,6 +177,7 @@ class _CortesState extends State<Cortes> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true, // ✅ permite ajustar con teclado
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -190,152 +191,155 @@ class _CortesState extends State<Cortes> {
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Padding(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-
-                    // Header
-                    Row(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 26,
-                          backgroundColor: cs.primary.withOpacity(0.15),
-                          child: Icon(Icons.local_gas_station,
-                              color: cs.primary, size: 28),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                "Cortes Despachador",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w800),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                "Inicia sesión para continuar",
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                        const SizedBox(height: 60),
 
-                    const SizedBox(height: 22),
-
-                    // Card Login
-                    Card(
-                      elevation: 8,
-                      shadowColor: Colors.black12,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                        // Header
+                        Row(
                           children: [
-                            Text(
-                              "Inicio de sesión",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: cs.onSurface,
-                              ),
+                            CircleAvatar(
+                              radius: 26,
+                              backgroundColor: cs.primary.withOpacity(0.15),
+                              child: Icon(Icons.local_gas_station,
+                                  color: cs.primary, size: 28),
                             ),
-                            const SizedBox(height: 14),
-
-                            TextField(
-                              controller: usuario,
-                              textInputAction: TextInputAction.next,
-                              maxLength: 10,
-                              decoration: InputDecoration(
-                                counterText: "",
-                                labelText: "Usuario",
-                                hintText: "Ingrese su usuario",
-                                prefixIcon: const Icon(Icons.person),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            TextField(
-                              controller: pass,
-                              maxLength: 10,
-                              obscureText: true,
-                              textInputAction: TextInputAction.done,
-                              decoration: InputDecoration(
-                                counterText: "",
-                                labelText: "Contraseña",
-                                hintText: "Ingrese su contraseña",
-                                prefixIcon: const Icon(Icons.lock),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onSubmitted: (_) => _iniciarSesion(),
-                            ),
-
-                            const SizedBox(height: 14),
-
-                            SizedBox(
-                              height: 48,
-                              child: FilledButton.icon(
-                                onPressed:
-                                    _loginLoading ? null : _iniciarSesion,
-                                icon: _loginLoading
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 2),
-                                      )
-                                    : const Icon(Icons.login),
-                                label: Text(_loginLoading
-                                    ? "Validando..."
-                                    : "Iniciar sesión"),
-                              ),
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            // Admin button (secondary)
-                            SizedBox(
-                              height: 46,
-                              child: OutlinedButton.icon(
-                                onPressed: _abrirAdmin,
-                                icon: const Icon(Icons.admin_panel_settings),
-                                label: const Text("Opciones de administrador"),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Cortes Despachador",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    "Inicia sesión para continuar",
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
 
-                    const Spacer(),
+                        const SizedBox(height: 30),
 
-                    // Footer
-                    Text(
-                      "© ${DateTime.now().year} • Servicio Franchuz",
-                      style: TextStyle(
-                          fontSize: 12, color: cs.onSurface.withOpacity(0.55)),
+                        // Card Login
+                        Card(
+                          elevation: 8,
+                          shadowColor: Colors.black12,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  "Inicio de sesión",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                TextField(
+                                  controller: usuario,
+                                  textInputAction: TextInputAction.next,
+                                  maxLength: 10,
+                                  decoration: InputDecoration(
+                                    counterText: "",
+                                    labelText: "Usuario",
+                                    hintText: "Ingrese su usuario",
+                                    prefixIcon: const Icon(Icons.person),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: pass,
+                                  maxLength: 10,
+                                  obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  decoration: InputDecoration(
+                                    counterText: "",
+                                    labelText: "Contraseña",
+                                    hintText: "Ingrese su contraseña",
+                                    prefixIcon: const Icon(Icons.lock),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  onSubmitted: (_) => _iniciarSesion(),
+                                ),
+                                const SizedBox(height: 14),
+                                SizedBox(
+                                  height: 48,
+                                  child: FilledButton.icon(
+                                    onPressed:
+                                        _loginLoading ? null : _iniciarSesion,
+                                    icon: _loginLoading
+                                        ? const SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
+                                          )
+                                        : const Icon(Icons.login),
+                                    label: Text(_loginLoading
+                                        ? "Validando..."
+                                        : "Iniciar sesión"),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  height: 46,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _abrirAdmin,
+                                    icon:
+                                        const Icon(Icons.admin_panel_settings),
+                                    label:
+                                        const Text("Opciones de administrador"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        //const Spacer(flex: 30), //sirve porque IntrinsicHeight + minHeight
+
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16, bottom: 8),
+                          child: Text(
+                            "© ${DateTime.now().year} • Desarrollado por JCGL",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: cs.onSurface.withOpacity(0.55),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),
