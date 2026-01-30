@@ -203,6 +203,7 @@ class _DatoCorteState extends State<DatoCorte> {
         clientes,
         total,
       );
+      await _enviarCorteTelegram();
 
       if (!mounted) return;
       setState(() => _guardando = false);
@@ -456,12 +457,7 @@ class _DatoCorteState extends State<DatoCorte> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _guardando
-                      ? null
-                      : () async {
-                          await _onGuardarPressed();
-                          await _enviarCorteTelegram();
-                        },
+                  onPressed: _guardando ? null : _onGuardarPressed,
                   child: const Text("Guardar Corte"),
                 ),
                 const SizedBox(height: 30),

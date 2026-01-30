@@ -6,7 +6,7 @@ class Registro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NuevoUsuario();
+    return const NuevoUsuario();
   }
 }
 
@@ -18,94 +18,295 @@ class NuevoUsuario extends StatefulWidget {
 }
 
 class _NuevoUsuarioState extends State<NuevoUsuario> {
+  final _formKey = GlobalKey<FormState>();
+
   final TextEditingController usuarios = TextEditingController();
   final TextEditingController pass = TextEditingController();
+  final TextEditingController pass2 = TextEditingController();
+
+  bool _verPass = false;
+  bool _verPass2 = false;
+  bool _registrando = false;
 
   @override
   void initState() {
-    // TODO: implement initState
-
     super.initState();
     usuarios.text = "";
     pass.text = "";
+    pass2.text = "";
+  }
+
+  @override
+  void dispose() {
+    usuarios.dispose();
+    pass.dispose();
+    pass2.dispose();
+    super.dispose();
+  }
+
+  Future<void> _registrar() async {
+    if (_registrando) return;
+
+    // valida form
+    final ok = _formKey.currentState?.validate() ?? false;
+    if (!ok) return;
+
+    setState(() => _registrando = true);
+
+    try {
+      final success = await registrarUsuario(
+        usuarios.text.trim(),
+        pass.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuario registrado con éxito')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al registrar el usuario. Intente nuevamente.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() => _registrando = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        backgroundColor: Colors.lightGreen,
-        title: const Text("Registro de Usuario",
-            style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-        centerTitle: true,
+        backgroundColor: cs.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        centerTitle: false,
+        title: const Text(
+          "Registro de Usuario",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        ),
       ),
       body: Container(
-        color: Colors.yellow[100],
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const Text(
-              "Registro de Nuevo Usuario",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            TextField(
-              maxLength: 10,
-              controller: usuarios,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                ),
-                labelText: 'Usuario',
-                hintText: 'Ingrese su usuario',
-                prefixIcon: Icon(Icons.person),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              maxLength: 10,
-              controller: pass,
-              obscureText: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                ),
-                labelText: 'Contraseña',
-                hintText: 'Ingrese su contraseña',
-                prefixIcon: Icon(Icons.lock),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implementar lógica de registro
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cs.primary.withOpacity(0.12),
+              cs.surface,
+              cs.surface,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Card(
+                  elevation: 10,
+                  shadowColor: Colors.black12,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 22,
+                                backgroundColor: cs.primary.withOpacity(0.15),
+                                child: Icon(Icons.person_add_alt_1,
+                                    color: cs.primary),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Nuevo usuario",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      "Crea una cuenta para acceder al sistema.",
+                                      style: TextStyle(fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
 
-                if (usuarios.text.isEmpty || pass.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Por favor, complete todos los campos')),
-                  );
-                  return;
-                }
-                registrarUsuario(usuarios.text, pass.text).then((success) {
-                  if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Usuario registrado con éxito')),
-                    );
-                    Navigator.pop(context); // Volver a la pantalla anterior
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'Error al registrar el usuario. Intente nuevamente.')),
-                    );
-                  }
-                });
-              },
-              child: const Text('Registrar', style: TextStyle(fontSize: 20)),
+                          const SizedBox(height: 16),
+
+                          // USUARIO
+                          TextFormField(
+                            controller: usuarios,
+                            maxLength: 10,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              counterText: "",
+                              labelText: "Usuario",
+                              hintText: "Ej: juan",
+                              prefixIcon: const Icon(Icons.person),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            validator: (v) {
+                              final value = (v ?? '').trim();
+                              if (value.isEmpty) {
+                                return 'Ingresa un usuario';
+                              }
+                              if (value.length < 3) {
+                                return 'Mínimo 3 caracteres';
+                              }
+                              // opcional: solo letras/números
+                              final ok =
+                                  RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value);
+                              if (!ok) return 'Solo letras, números o _';
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // CONTRASEÑA
+                          TextFormField(
+                            controller: pass,
+                            maxLength: 10,
+                            obscureText: !_verPass,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              counterText: "",
+                              labelText: "Contraseña",
+                              hintText: "Crea una contraseña",
+                              prefixIcon: const Icon(Icons.lock),
+                              suffixIcon: IconButton(
+                                tooltip: _verPass ? 'Ocultar' : 'Mostrar',
+                                icon: Icon(_verPass
+                                    ? Icons.visibility_off
+                                    : Icons.visibility),
+                                onPressed: () =>
+                                    setState(() => _verPass = !_verPass),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            validator: (v) {
+                              final value = (v ?? '').trim();
+                              if (value.isEmpty)
+                                return 'Ingresa una contraseña';
+                              if (value.length < 4)
+                                return 'Mínimo 4 caracteres';
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // CONFIRMAR CONTRASEÑA
+                          TextFormField(
+                            controller: pass2,
+                            maxLength: 10,
+                            obscureText: !_verPass2,
+                            textInputAction: TextInputAction.done,
+                            decoration: InputDecoration(
+                              counterText: "",
+                              labelText: "Confirmar contraseña",
+                              hintText: "Repite la contraseña",
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                tooltip: _verPass2 ? 'Ocultar' : 'Mostrar',
+                                icon: Icon(_verPass2
+                                    ? Icons.visibility_off
+                                    : Icons.visibility),
+                                onPressed: () =>
+                                    setState(() => _verPass2 = !_verPass2),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            validator: (v) {
+                              final value = (v ?? '').trim();
+                              if (value.isEmpty)
+                                return 'Confirma la contraseña';
+                              if (value != pass.text.trim()) {
+                                return 'Las contraseñas no coinciden';
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _registrar(),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // BOTÓN REGISTRAR
+                          SizedBox(
+                            height: 50,
+                            child: FilledButton.icon(
+                              onPressed: _registrando ? null : _registrar,
+                              icon: _registrando
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : const Icon(Icons.check_circle),
+                              label: Text(_registrando
+                                  ? "Registrando..."
+                                  : "Registrar"),
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // CANCELAR / VOLVER
+                          SizedBox(
+                            height: 46,
+                            child: OutlinedButton.icon(
+                              onPressed: _registrando
+                                  ? null
+                                  : () => Navigator.pop(context),
+                              icon: const Icon(Icons.arrow_back),
+                              label: const Text("Volver"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
