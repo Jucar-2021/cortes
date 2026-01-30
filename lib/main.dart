@@ -11,7 +11,6 @@ Future<void> main() async {
     await dotenv.load(fileName: ".env");
   } catch (e) {
     debugPrint("ERROR cargando .env: $e");
-    // No detenemos la app
   }
   runApp(const MyApp());
 }
@@ -21,13 +20,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final base = ThemeData(
+      useMaterial3: true,
+      colorSchemeSeed: Colors.blue,
+      brightness: Brightness.light,
+    );
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Cortes Despachador",
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-
-      // Localizaciones: esto elimina "No MaterialLocalizations found"
+      theme: base,
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
+        brightness: Brightness.dark,
+      ),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -41,7 +48,7 @@ class MyApp extends StatelessWidget {
       home: const Cortes(),
       initialRoute: '/login',
       routes: {
-        '/login': (_) => const Cortes(), // pantalla de inicio de sesión
+        '/login': (_) => const Cortes(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/captura') {
@@ -51,14 +58,16 @@ class MyApp extends StatelessWidget {
           final idUsuario = args?['idUsuario'] as int? ?? 0;
 
           return MaterialPageRoute(
-            builder: (_) => Captura(
-              usuario: usuario,
-              idUsuario: idUsuario,
-            ),
+            builder: (_) => Captura(usuario: usuario, idUsuario: idUsuario),
           );
         }
         return null;
       },
+      onUnknownRoute: (_) => MaterialPageRoute(
+        builder: (_) => const Scaffold(
+          body: Center(child: Text("Ruta no encontrada")),
+        ),
+      ),
     );
   }
 }
@@ -77,29 +86,37 @@ class _CortesState extends State<Cortes> {
 
   late Future<void> consultabd;
 
+  bool _loginLoading = false; // solo visual, tu lógica sigue igual
+
   @override
   void initState() {
     super.initState();
     usuario.text = "";
     pass.text = "";
     claveAcceso.text = "";
+
     final Db conn = Db();
-    consultabd = conn.consultarBD();
+    consultabd = conn.consultarBD(); // lo dejas igual
   }
 
   @override
   void dispose() {
     usuario.dispose();
     pass.dispose();
+    claveAcceso.dispose();
     super.dispose();
   }
 
   Future<void> _iniciarSesion() async {
+    if (_loginLoading) return;
+
     final user = usuario.text.trim();
     final pwd = pass.text.trim();
 
+    setState(() => _loginLoading = true);
     final idUsuario = await obtenerId(user, pwd);
     if (!mounted) return;
+    setState(() => _loginLoading = false);
 
     if (idUsuario != -1) {
       Navigator.pushReplacementNamed(
@@ -114,7 +131,6 @@ class _CortesState extends State<Cortes> {
     }
   }
 
-  // metodo pra consultar IdUsuario de la bd
   Future<int> obtenerId(String usuario, String pass) async {
     final db = Db();
 
@@ -124,105 +140,203 @@ class _CortesState extends State<Cortes> {
         'SELECT idUsuario FROM Usuarios WHERE usuarios = ? AND pass = ? LIMIT 1',
         [usuario, pass],
       );
-
       await conn.close();
 
       if (results.isEmpty) return -1;
-
       return int.parse(results.first[0].toString());
     } catch (e) {
-      print('Error login: $e');
+      debugPrint('Error login: $e');
       return -1;
+    }
+  }
+
+  Future<void> _abrirAdmin() async {
+    final accesoConcedido = await mostrarDialogoClaveAcceso(context);
+
+    if (!mounted) return;
+
+    if (accesoConcedido) {
+      claveAcceso.clear();
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeAdmin()),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Acceso concedido.')),
+      );
+    } else {
+      claveAcceso.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Acceso denegado. Clave incorrecta.')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
-        centerTitle: true,
-        title: const Text(
-          "Inicio de Sesión",
-          style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-        ),
-      ),
       body: Container(
-        color: Colors.grey[200],
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const Text(
-              "Bienvenido al sistema de Cortes",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            TextField(
-              textInputAction: TextInputAction.next,
-              maxLength: 10,
-              controller: usuario,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cs.primary.withOpacity(0.15),
+              cs.surface,
+              cs.surface,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // Header
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 26,
+                          backgroundColor: cs.primary.withOpacity(0.15),
+                          child: Icon(Icons.local_gas_station,
+                              color: cs.primary, size: 28),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                "Cortes Despachador",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w800),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                "Inicia sesión para continuar",
+                                style: TextStyle(fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // Card Login
+                    Card(
+                      elevation: 8,
+                      shadowColor: Colors.black12,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              "Inicio de sesión",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: cs.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+
+                            TextField(
+                              controller: usuario,
+                              textInputAction: TextInputAction.next,
+                              maxLength: 10,
+                              decoration: InputDecoration(
+                                counterText: "",
+                                labelText: "Usuario",
+                                hintText: "Ingrese su usuario",
+                                prefixIcon: const Icon(Icons.person),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            TextField(
+                              controller: pass,
+                              maxLength: 10,
+                              obscureText: true,
+                              textInputAction: TextInputAction.done,
+                              decoration: InputDecoration(
+                                counterText: "",
+                                labelText: "Contraseña",
+                                hintText: "Ingrese su contraseña",
+                                prefixIcon: const Icon(Icons.lock),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onSubmitted: (_) => _iniciarSesion(),
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            SizedBox(
+                              height: 48,
+                              child: FilledButton.icon(
+                                onPressed:
+                                    _loginLoading ? null : _iniciarSesion,
+                                icon: _loginLoading
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.login),
+                                label: Text(_loginLoading
+                                    ? "Validando..."
+                                    : "Iniciar sesión"),
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            // Admin button (secondary)
+                            SizedBox(
+                              height: 46,
+                              child: OutlinedButton.icon(
+                                onPressed: _abrirAdmin,
+                                icon: const Icon(Icons.admin_panel_settings),
+                                label: const Text("Opciones de administrador"),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Footer
+                    Text(
+                      "© ${DateTime.now().year} • Servicio Franchuz",
+                      style: TextStyle(
+                          fontSize: 12, color: cs.onSurface.withOpacity(0.55)),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
                 ),
-                labelText: 'Usuario',
-                hintText: 'Ingrese su usuario',
-                prefixIcon: Icon(Icons.person),
               ),
             ),
-            const SizedBox(height: 20),
-            TextField(
-              maxLength: 10,
-              controller: pass,
-              obscureText: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                ),
-                labelText: 'Contraseña',
-                hintText: 'Ingrese su contraseña',
-                prefixIcon: Icon(Icons.lock),
-              ),
-              onSubmitted: (_) => _iniciarSesion(),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _iniciarSesion,
-              child:
-                  const Text('Iniciar Sesión', style: TextStyle(fontSize: 20)),
-            ),
-            TextButton.icon(
-              onPressed: () {
-                mostrarDialogoClaveAcceso(context).then((accesoConcedido) {
-                  if (accesoConcedido) {
-                    claveAcceso.clear();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeAdmin(),
-                      ),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Acceso concedido.'),
-                      ),
-                    );
-                  } else {
-                    claveAcceso.clear();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Acceso denegado. Clave incorrecta.'),
-                      ),
-                    );
-                  }
-                });
-              },
-              icon: const Icon(Icons.person_add_alt_1,
-                  color: Colors.black, size: 30),
-              label: const Text('opciones de administrador',
-                  style: TextStyle(fontSize: 20, color: Colors.black)),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -245,19 +359,13 @@ class _CortesState extends State<Cortes> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+              onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancelar'),
             ),
-            TextButton(
+            FilledButton(
               onPressed: () {
                 final clave = int.tryParse(claveAcceso.text.trim()) ?? 0;
-                if (clave == 2021) {
-                  Navigator.of(context).pop(true);
-                } else {
-                  Navigator.of(context).pop(false);
-                }
+                Navigator.of(context).pop(clave == 2021);
               },
               child: const Text('Aceptar'),
             ),
