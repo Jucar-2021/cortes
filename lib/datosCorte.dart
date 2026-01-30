@@ -4,6 +4,8 @@ import 'bauchers_clientes/santander.dart';
 import 'bauchers_clientes/mifel.dart';
 import 'bauchers_clientes/efecticard.dart';
 import 'bauchers_clientes/clientes.dart';
+import 'package:cortes/administrador/notifTelegram/configApi.dart';
+import 'package:intl/intl.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -30,6 +32,8 @@ class _DatoCorteState extends State<DatoCorte> {
   final TextEditingController _depositosController = TextEditingController();
   final TextEditingController _buzonController = TextEditingController();
   final TextEditingController _gastosController = TextEditingController();
+
+  final NotificacionesTelegram _corteTelegram = NotificacionesTelegram();
 
   double _totalSantander = 0;
   double _totalMifel = 0;
@@ -78,7 +82,12 @@ class _DatoCorteState extends State<DatoCorte> {
   }
 
   // ======== FORMATO DINERO ========
-  String _fmt(double valor) => '\$${valor.toStringAsFixed(2)}';
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+
+  String _fmt(double valor) {
+    return _currencyFormat.format(valor);
+  }
 
   // ======== NAVEGAR A PANTALLAS DE BAUCHERS ========
   Future<void> _editarSantander() async {
@@ -272,6 +281,35 @@ class _DatoCorteState extends State<DatoCorte> {
     );
   }
 
+  // Funcion para enviar corte por Telegram}
+  Future<void> _enviarCorteTelegram() async {
+    final mensaje = '''
+<b>⛽ Corte de $user</b>
+
+<b>$fecha</b>
+
+<b>Venta del día:</b> ${_fmt(double.tryParse(_ventaController.text) ?? 0)}
+
+<b>Santander:</b> ${_fmt(_totalSantander)}
+
+<b>Mifel:</b> ${_fmt(_totalMifel)}
+
+<b>Efecticar:</b> ${_fmt(_totalEfecticar)}
+
+<b>Depósitos Cajero:</b> ${_fmt(double.tryParse(_depositosController.text) ?? 0)}
+
+<b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
+
+<b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
+
+<b>Total clientes:</b> ${_fmt(_totalClientes)}
+
+<b>Diferencia a entregar:</b> ${_fmt(totalFinal)}
+''';
+
+    await _corteTelegram.enviarNotificacion(mensaje);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -418,7 +456,12 @@ class _DatoCorteState extends State<DatoCorte> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _guardando ? null : _onGuardarPressed,
+                  onPressed: _guardando
+                      ? null
+                      : () async {
+                          await _onGuardarPressed();
+                          await _enviarCorteTelegram();
+                        },
                   child: const Text("Guardar Corte"),
                 ),
                 const SizedBox(height: 30),

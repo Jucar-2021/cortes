@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cortes/db.dart';
+import 'package:intl/intl.dart';
 
 class _BaucherItem {
   final int? idEfecticar; // null = aún no existe en BD
@@ -273,7 +274,12 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
     }
   }
 
-  String _fmt(double valor) => '\$${valor.toStringAsFixed(2)}';
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+
+  String _fmt(double valor) {
+    return _currencyFormat.format(valor);
+  }
 
   @override
   Widget build(BuildContext context) {

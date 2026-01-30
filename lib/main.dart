@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
 import 'captura.dart';
-import 'administrador/registroUser.dart'; // Debe contener Captura/Ingreso SIN MaterialApp anidado
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
