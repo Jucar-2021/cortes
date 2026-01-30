@@ -287,7 +287,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
       final msg = _errorCarga; // copia local
 
       if (msg != null) {
-        WidgetsBinding.instance?.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(msg)),
