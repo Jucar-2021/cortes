@@ -32,11 +32,12 @@ class Db {
   Future<List<Map<String, dynamic>>> obtenerSantanderPorUsuarioFecha({
     required int idUsuario,
     required String fecha,
+    required String producto,
   }) async {
     final conn = await connection;
     final results = await conn.query(
-      'SELECT idSantander, importe FROM Santander WHERE idUsuario = ? AND fecha = ? ORDER BY idSantander ASC',
-      [idUsuario, fecha],
+      'SELECT idSantander, importe FROM Santander WHERE idUsuario = ? AND fecha = ? AND producto = ? ORDER BY idSantander ASC',
+      [idUsuario, fecha, producto],
     );
 
     await conn.close();
@@ -117,12 +118,13 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Santander (idUsuario, fecha, importe) VALUES (?, ?, ?)',
+        'INSERT INTO Santander (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
         [idUsuario, fecha, imp],
       );
     }
@@ -226,12 +228,13 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     // borrar todos los del día/usuario
     await conn.query(
-      'DELETE FROM Santander WHERE idUsuario = ? AND fecha = ?',
+      'DELETE FROM Santander WHERE idUsuario = ? AND fecha = ? AND producto = ?',
       [idUsuario, fecha],
     );
 

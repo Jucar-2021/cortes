@@ -17,12 +17,15 @@ class _BaucherItem {
 class SantanderBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
+  final String producto; // compatibilidad con tu llamada actual
+  final String user; // compatibilidad con tu llamada actual
 
   const SantanderBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
-    required String user, // compatibilidad con tu llamada actual
+    required this.user,
+    required this.producto, // compatibilidad con tu llamada actual
   });
 
   @override
@@ -80,6 +83,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
       final rows = await db.obtenerSantanderPorUsuarioFecha(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
+        producto: widget.producto, // compatibilidad con tu llamada actual
       );
 
       if (!mounted) return;
@@ -174,6 +178,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget.producto, // compatibilidad con tu llamada actual
     );
   }
 
@@ -183,6 +188,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget.producto, // compatibilidad con tu llamada actual
     );
   }
 

@@ -100,6 +100,7 @@ class _DatoCorteState extends State<DatoCorte> {
           fecha: fecha,
           user: user,
           idUsuario: widget.idUsuario,
+          producto: producto,
         ),
       ),
     );
