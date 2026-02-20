@@ -25,6 +25,7 @@ class Ingreso extends StatefulWidget {
 class _IngresoState extends State<Ingreso> {
   final TextEditingController _fechaSelec = TextEditingController();
   DateTime? _fechaSeleccionada;
+  String? tipoZonaCorte;
 
   late String user;
   late int idUsuario;
@@ -69,6 +70,14 @@ class _IngresoState extends State<Ingreso> {
       return;
     }
 
+    if (tipoZonaCorte == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Selecciona el tipo de zona: Gasolina o Diésel')),
+      );
+      return;
+    }
+
     final fecha = _fechaSelec.text;
 
     Navigator.push(
@@ -78,6 +87,7 @@ class _IngresoState extends State<Ingreso> {
           fecha: fecha,
           user: user,
           idUsuario: idUsuario,
+          tipoZonaCorte: tipoZonaCorte!,
         ),
       ),
     );
@@ -195,6 +205,49 @@ class _IngresoState extends State<Ingreso> {
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 14),
+
+                            //aui se seleciona el tipo de venta si es gasolina o diesel,
+                            //de esta forma se identidicara el tipo de corte,
+                            const SizedBox(height: 10),
+
+                            Text(
+                              "Tipo de zona de corte",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: cs.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+
+                            Container(
+                              decoration: BoxDecoration(
+                                color: cs.surface,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: cs.outlineVariant),
+                              ),
+                              child: Column(
+                                children: [
+                                  RadioListTile<String>(
+                                    title: const Text("Gasolina"),
+                                    value: "Gasolina",
+                                    groupValue: tipoZonaCorte,
+                                    onChanged: (value) =>
+                                        setState(() => tipoZonaCorte = value),
+                                  ),
+                                  Divider(height: 1, color: cs.outlineVariant),
+                                  RadioListTile<String>(
+                                    title: const Text("Diésel"),
+                                    value: "Diesel",
+                                    groupValue: tipoZonaCorte,
+                                    onChanged: (value) =>
+                                        setState(() => tipoZonaCorte = value),
+                                  ),
+                                ],
+                              ),
+                            ),
+
                             const SizedBox(height: 14),
                             SizedBox(
                               height: 50,

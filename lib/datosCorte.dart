@@ -13,11 +13,13 @@ class DatoCorte extends StatefulWidget {
     required this.fecha,
     required this.user,
     required this.idUsuario,
+    required this.tipoZonaCorte,
   });
 
   final String fecha;
   final String user;
   final int idUsuario;
+  final String tipoZonaCorte;
 
   @override
   State<DatoCorte> createState() => _DatoCorteState();
@@ -27,7 +29,7 @@ class _DatoCorteState extends State<DatoCorte> {
   late String fecha;
   late String user;
   late int idUsuario;
-
+  late String producto;
   late TextEditingController _ventaController;
   final TextEditingController _depositosController = TextEditingController();
   final TextEditingController _buzonController = TextEditingController();
@@ -49,7 +51,7 @@ class _DatoCorteState extends State<DatoCorte> {
     fecha = widget.fecha;
     user = widget.user;
     idUsuario = widget.idUsuario;
-
+    producto = widget.tipoZonaCorte;
     _ventaController = TextEditingController();
   }
 
@@ -285,27 +287,39 @@ class _DatoCorteState extends State<DatoCorte> {
   // Funcion para enviar corte por Telegram}
   Future<void> _enviarCorteTelegram() async {
     final mensaje = '''
-<b>⛽ Corte de $user</b>
+<b>⛽ CORTE DE TURNO</b>
+👤 <b>$user</b>
 
-<b>$fecha</b>
+━━━━━━━━━━━━━━━━━━
 
-<b>Venta del día:</b> ${_fmt(double.tryParse(_ventaController.text) ?? 0)}
+📦 <b>Producto:</b> <code>$producto</code>
+📅 <b>Fecha:</b> <b>$fecha</b>
+━━━━━━━━━━━━━━━━━━
 
-<b>Santander:</b> ${_fmt(_totalSantander)}
+💰 <b>Venta del día:</b> ${_fmt(double.tryParse(_ventaController.text) ?? 0)}
 
-<b>Mifel:</b> ${_fmt(_totalMifel)}
+🏦 <b>Santander:</b> ${_fmt(_totalSantander)}
+🏦 <b>Mifel:</b> ${_fmt(_totalMifel)}
+🏦 <b>Efecticar:</b> ${_fmt(_totalEfecticar)}
 
-<b>Efecticar:</b> ${_fmt(_totalEfecticar)}
+━━━━━━━━━━━━━━━━━━
 
-<b>Depósitos Cajero:</b> ${_fmt(double.tryParse(_depositosController.text) ?? 0)}
+🏧 <b>Depósitos Cajero:</b> ${_fmt(double.tryParse(_depositosController.text) ?? 0)}
+📥 <b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
+🧾 <b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
 
-<b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
+👥 <b>Total clientes:</b> ${_fmt(_totalClientes)}
 
-<b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
+━━━━━━━━━━━━━━━━━━
 
-<b>Total clientes:</b> ${_fmt(_totalClientes)}
+🔴 <b>DIFERENCIA A ENTREGAR:</b>
+💵 <b>${_fmt(totalFinal)}</b>
 
-<b>Diferencia a entregar:</b> ${_fmt(totalFinal)}
+━━━━━━━━━━━━━━━━━━
+
+🟢 <b>TOTAL EFECTIVO:</b>
+💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal)}</b>
+
 ''';
 
     await _corteTelegram.enviarNotificacion(mensaje);
