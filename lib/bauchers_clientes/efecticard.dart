@@ -17,12 +17,14 @@ class _BaucherItem {
 class EfecticarBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
+  final String producto; // compatibilidad con tu llamada actual
 
   const EfecticarBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
-    required String user, // compatibilidad con tu llamada actual
+    required String user,
+    required this.producto, // compatibilidad con tu llamada actual
   });
 
   @override
@@ -80,6 +82,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
       final rows = await db.obtenerEfecticardPorUsuarioFecha(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
+        producto: widget.producto, // compatibilidad con tu llamada actual
       );
 
       if (!mounted) return;
@@ -174,6 +177,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget.producto, // compatibilidad con tu llamada actual
     );
   }
 
@@ -183,6 +187,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget.producto, // compatibilidad con tu llamada actual
     );
   }
 

@@ -18,13 +18,12 @@ class SantanderBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
   final String producto; // compatibilidad con tu llamada actual
-  final String user; // compatibilidad con tu llamada actual
 
   const SantanderBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
-    required this.user,
+    required String user,
     required this.producto, // compatibilidad con tu llamada actual
   });
 

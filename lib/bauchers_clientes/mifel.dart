@@ -17,12 +17,14 @@ class _BaucherItem {
 class MifelBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
+  final String producto; // compatibilidad con tu llamada actual
 
   const MifelBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
-    required String user, // compatibilidad con tu llamada actual
+    required String user,
+    required this.producto, // compatibilidad con tu llamada actual
   });
 
   @override
@@ -79,6 +81,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
       final rows = await db.obtenerMifelPorUsuarioFecha(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
+        producto: widget.producto, // compatibilidad con tu llamada actual
       );
 
       if (!mounted) return;
@@ -173,6 +176,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget.producto, // compatibilidad con tu llamada actual
     );
   }
 
@@ -182,6 +186,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget.producto, // compatibilidad con tu llamada actual
     );
   }
 

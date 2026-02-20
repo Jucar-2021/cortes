@@ -119,6 +119,7 @@ class _DatoCorteState extends State<DatoCorte> {
           fecha: fecha,
           user: user,
           idUsuario: widget.idUsuario,
+          producto: producto,
         ),
       ),
     );
@@ -137,6 +138,7 @@ class _DatoCorteState extends State<DatoCorte> {
           fecha: fecha,
           user: user,
           idUsuario: widget.idUsuario,
+          producto: producto,
         ),
       ),
     );
@@ -157,6 +159,7 @@ class _DatoCorteState extends State<DatoCorte> {
           fecha: fecha,
           user: user,
           idUsuario: widget.idUsuario,
+          producto: producto,
         ),
       ),
     );
@@ -205,6 +208,7 @@ class _DatoCorteState extends State<DatoCorte> {
         gastos,
         clientes,
         total,
+        producto,
       );
       await _enviarCorteTelegram();
 
@@ -266,6 +270,7 @@ class _DatoCorteState extends State<DatoCorte> {
     double gastos,
     double clientes,
     double total,
+    String producto,
   ) async {
     final db = Db();
 
@@ -273,6 +278,7 @@ class _DatoCorteState extends State<DatoCorte> {
       fecha: fecha,
       idUsuario: idUsuario,
       usuario: user,
+      producto: producto,
       venta: venta,
       santander: santander,
       mifel: mifel,
@@ -282,6 +288,7 @@ class _DatoCorteState extends State<DatoCorte> {
       gastos: gastos,
       clientes: clientes,
       efectivoEntregado: total,
+      // OJO: aquí también, para compatibilidad con tu función actual. Si tu función ya tiene producto, úsalo directamente.
     );
   }
 

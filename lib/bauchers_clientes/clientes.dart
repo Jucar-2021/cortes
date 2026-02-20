@@ -17,12 +17,15 @@ class _ClientesItem {
 class ClientesBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
+  final String
+      producto; // nuevo campo para compatibilidad con tu función actual
 
   const ClientesBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
-    required String user, // compatibilidad con tu llamada actual
+    required String user,
+    required this.producto, // compatibilidad con tu llamada actual
   });
 
   @override
@@ -79,6 +82,8 @@ class _ClientesBauchersPageState extends State<ClientesBauchersPage> {
       final rows = await db.obtenerClientePorUsuarioFecha(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
+        producto: widget
+            .producto, // nuevo campo para compatibilidad con tu función actual
       );
 
       if (!mounted) return;
@@ -173,15 +178,19 @@ class _ClientesBauchersPageState extends State<ClientesBauchersPage> {
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget
+          .producto, // nuevo campo para compatibilidad con tu función actual
     );
   }
 
   Future<void> _actualizar(List<double> importes) async {
     final db = Db();
-    await db.reemplazarMifelPorUsuarioFecha(
+    await db.reemplazarClientePorUsuarioFecha(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
+      producto: widget
+          .producto, // nuevo campo para compatibilidad con tu función actual
     );
   }
 

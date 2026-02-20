@@ -54,11 +54,12 @@ class Db {
   Future<List<Map<String, dynamic>>> obtenerMifelPorUsuarioFecha({
     required int idUsuario,
     required String fecha,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
     final results = await conn.query(
-      'SELECT idMifel, importe FROM Mifel WHERE idUsuario = ? AND fecha = ? ORDER BY idMifel ASC',
-      [idUsuario, fecha],
+      'SELECT idMifel, importe FROM Mifel WHERE idUsuario = ? AND fecha = ? AND producto = ? ORDER BY idMifel ASC',
+      [idUsuario, fecha, producto],
     );
 
     await conn.close();
@@ -75,11 +76,12 @@ class Db {
   Future<List<Map<String, dynamic>>> obtenerEfecticardPorUsuarioFecha({
     required int idUsuario,
     required String fecha,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
     final results = await conn.query(
-      'SELECT idEfecticar, importe FROM Efecticar WHERE idUsuario = ? AND fecha = ? ORDER BY idEfecticar ASC',
-      [idUsuario, fecha],
+      'SELECT idEfecticar, importe FROM Efecticar WHERE idUsuario = ? AND fecha = ? AND producto = ? ORDER BY idEfecticar ASC',
+      [idUsuario, fecha, producto],
     );
 
     await conn.close();
@@ -96,11 +98,12 @@ class Db {
   Future<List<Map<String, dynamic>>> obtenerClientePorUsuarioFecha({
     required int idUsuario,
     required String fecha,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
     final results = await conn.query(
-      'SELECT idCliente, importe FROM Clientes WHERE idUsuario = ? AND fecha = ? ORDER BY idCliente ASC',
-      [idUsuario, fecha],
+      'SELECT idCliente, importe FROM Clientes WHERE idUsuario = ? AND fecha = ? AND producto = ? ORDER BY idCliente ASC',
+      [idUsuario, fecha, producto],
     );
 
     await conn.close();
@@ -125,7 +128,7 @@ class Db {
     for (final imp in importes) {
       await conn.query(
         'INSERT INTO Santander (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
-        [idUsuario, fecha, imp],
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -137,13 +140,14 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Mifel (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Mifel (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -155,13 +159,14 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Efecticar (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Efecticar (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -173,13 +178,14 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Clientes (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Clientes (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -235,14 +241,14 @@ class Db {
     // borrar todos los del día/usuario
     await conn.query(
       'DELETE FROM Santander WHERE idUsuario = ? AND fecha = ? AND producto = ?',
-      [idUsuario, fecha],
+      [idUsuario, fecha, producto],
     );
 
     // insertar los nuevos
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Santander (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Santander (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -253,20 +259,21 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     // borrar todos los del día/usuario
     await conn.query(
-      'DELETE FROM Mifel WHERE idUsuario = ? AND fecha = ?',
-      [idUsuario, fecha],
+      'DELETE FROM Mifel WHERE idUsuario = ? AND fecha = ? AND producto = ?',
+      [idUsuario, fecha, producto],
     );
 
     // insertar los nuevos
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Mifel (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Mifel (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -277,20 +284,21 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     // borrar todos los del día/usuario
     await conn.query(
-      'DELETE FROM Efecticar WHERE idUsuario = ? AND fecha = ?',
-      [idUsuario, fecha],
+      'DELETE FROM Efecticar WHERE idUsuario = ? AND fecha = ? AND producto = ?',
+      [idUsuario, fecha, producto],
     );
 
     // insertar los nuevos
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Efecticar (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Efecticar (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -301,20 +309,21 @@ class Db {
     required int idUsuario,
     required String fecha,
     required List<double> importes,
+    required String producto, // compatibilidad con tu llamada actual
   }) async {
     final conn = await connection;
 
     // borrar todos los del día/usuario
     await conn.query(
-      'DELETE FROM Clientes WHERE idUsuario = ? AND fecha = ?',
-      [idUsuario, fecha],
+      'DELETE FROM Clientes WHERE idUsuario = ? AND fecha = ? AND producto = ?',
+      [idUsuario, fecha, producto],
     );
 
     // insertar los nuevos
     for (final imp in importes) {
       await conn.query(
-        'INSERT INTO Clientes (idUsuario, fecha, importe) VALUES (?, ?, ?)',
-        [idUsuario, fecha, imp],
+        'INSERT INTO Clientes (idUsuario, fecha, importe, producto) VALUES (?, ?, ?, ?)',
+        [idUsuario, fecha, imp, producto],
       );
     }
 
@@ -325,6 +334,7 @@ class Db {
     required String fecha,
     required int idUsuario,
     required String usuario,
+    required String producto,
     required double venta,
     required double santander,
     required double mifel,
@@ -339,11 +349,12 @@ class Db {
 
     try {
       await conn.query(
-        'INSERT INTO Corte (fecha, idUsuario, usuario, venta, santander, mifel, efecticar, depositos, buzon, gastos, clientes, efectivoEntregado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO Corte (fecha, idUsuario, usuario ,producto ,venta, santander, mifel, efecticar, depositos, buzon, gastos, clientes, efectivoEntregado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           fecha,
           idUsuario,
           usuario,
+          producto,
           venta,
           santander,
           mifel,
