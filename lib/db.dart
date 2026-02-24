@@ -389,7 +389,7 @@ class ApiService {
 
       return response.body;
     } catch (e) {
-      print('Error al conectar con la API: $e');
+      print('Error al conectar con la API->: $e');
       rethrow;
     }
   }
