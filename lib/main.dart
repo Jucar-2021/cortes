@@ -88,6 +88,8 @@ class _CortesState extends State<Cortes> {
 
   bool _loginLoading = false; // solo visual, tu lógica sigue igual
 
+  final ApiService api = ApiService();
+
   @override
   void initState() {
     super.initState();
@@ -96,7 +98,12 @@ class _CortesState extends State<Cortes> {
     claveAcceso.text = "";
 
     final Db conn = Db();
-    consultabd = conn.consultarBD(); // lo dejas igual
+
+    api.fetchData('config.php').then((data) {
+      debugPrint('Respuesta API->: $data');
+    }).catchError((error) {
+      debugPrint('Error al llamar API: $error');
+    });
   }
 
   @override

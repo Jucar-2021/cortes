@@ -1,4 +1,4 @@
-import 'db.dart';
+import 'Db.dart';
 
 Future<bool> registrarUsuario(String usuarios, String pass) async {
   try {

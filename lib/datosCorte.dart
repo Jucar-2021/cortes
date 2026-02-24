@@ -1,4 +1,4 @@
-import 'package:cortes/db.dart';
+import 'package:cortes/Db.dart';
 import 'package:flutter/material.dart';
 import 'bauchers_clientes/santander.dart';
 import 'bauchers_clientes/mifel.dart';

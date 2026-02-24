@@ -374,3 +374,23 @@ class Db {
     }
   }
 }
+
+class ApiService {
+  final String baseUrl = dotenv.env['API_BASE_URL'] ?? '';
+
+  Future<String> fetchData(String endpoint) async {
+    final url = Uri.parse('$baseUrl/$endpoint'); // ❌ quita el /
+
+    try {
+      final response = await http.get(url);
+
+      print('StatusCode: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      return response.body;
+    } catch (e) {
+      print('Error al conectar con la API: $e');
+      rethrow;
+    }
+  }
+}
