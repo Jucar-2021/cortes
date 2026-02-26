@@ -1,4 +1,4 @@
-import 'package:cortes/administrador/registroUser.dart';
+import 'package:cortes/administrador/adminUser/registroUser.dart';
 import 'package:flutter/material.dart';
 
 class HomeAdmin extends StatelessWidget {

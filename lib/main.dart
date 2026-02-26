@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'db.dart';
 import 'captura.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'api/consumoPHP.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

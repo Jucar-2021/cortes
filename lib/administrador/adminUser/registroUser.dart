@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../loggin.dart'; // para usar registrarUsuario
+import 'loggin.dart'; // para usar registrarUsuario
+import 'package:cortes/api/consumoPHP.dart';
 
 class Registro extends StatelessWidget {
   const Registro({super.key});
@@ -28,6 +29,8 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
   bool _verPass2 = false;
   bool _registrando = false;
 
+  final ApiService apiService = ApiService();
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +57,7 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
     setState(() => _registrando = true);
 
     try {
-      final success = await registrarUsuario(
+      final success = await apiService.registrarUsuario(
         usuarios.text.trim(),
         pass.text.trim(),
       );

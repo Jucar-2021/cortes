@@ -1,6 +1,5 @@
 import 'package:mysql1/mysql1.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 
 class Db {
   final settings = ConnectionSettings(
@@ -371,26 +370,6 @@ class Db {
       await conn.close();
     } catch (e) {
       print('Error al insertar corte: $e');
-    }
-  }
-}
-
-class ApiService {
-  final String baseUrl = dotenv.env['API_BASE_URL'] ?? '';
-
-  Future<String> fetchData(String endpoint) async {
-    final url = Uri.parse('$baseUrl/$endpoint'); // ❌ quita el /
-
-    try {
-      final response = await http.get(url);
-
-      print('StatusCode: ${response.statusCode}');
-      print('Body: ${response.body}');
-
-      return response.body;
-    } catch (e) {
-      print('Error al conectar con la API->: $e');
-      rethrow;
     }
   }
 }
