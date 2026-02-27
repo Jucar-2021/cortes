@@ -78,4 +78,35 @@ class ApiService {
       throw Exception("Error API");
     }
   }
+
+  //Metodo para validar el usuario y contraseña iniciar sesion
+  Future<int> validarUsuario(String usuario, String pass) async {
+    try {
+      final url = Uri.parse('$baseUrl/User/validar.php');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'usuarios': usuario, 'pass': pass}),
+      );
+
+      // Debug útil
+      // print("Status: ${response.statusCode}");
+      // print("Body: ${response.body}");
+
+      final body = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && body['ok'] == true) {
+        final id = body['idUsuario'];
+        if (id is int) return id;
+        if (id is String) return int.tryParse(id) ?? -1;
+        return -1;
+      }
+
+      return -1;
+    } catch (e) {
+      print('Error al validar por HTTP: $e');
+      return -1;
+    }
+  }
 }

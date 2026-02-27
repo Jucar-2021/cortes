@@ -1,7 +1,6 @@
 import 'package:cortes/administrador/homeAdmin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'db.dart';
 import 'captura.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'api/consumoPHP.dart';
@@ -98,8 +97,6 @@ class _CortesState extends State<Cortes> {
     pass.text = "";
     claveAcceso.text = "";
 
-    final Db conn = Db();
-
     api.fetchData('config.php').then((data) {
       debugPrint('Respuesta API->: $data');
     }).catchError((error) {
@@ -122,7 +119,10 @@ class _CortesState extends State<Cortes> {
     final pwd = pass.text.trim();
 
     setState(() => _loginLoading = true);
-    final idUsuario = await obtenerId(user, pwd);
+
+    final idUsuario = await api.validarUsuario(user, pwd);
+    print("idUsuario recibido: $idUsuario");
+
     if (!mounted) return;
     setState(() => _loginLoading = false);
 
@@ -136,25 +136,6 @@ class _CortesState extends State<Cortes> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuario o contraseña incorrectos')),
       );
-    }
-  }
-
-  Future<int> obtenerId(String usuario, String pass) async {
-    final db = Db();
-
-    try {
-      final conn = await db.connection;
-      final results = await conn.query(
-        'SELECT idUsuario FROM Usuarios WHERE usuarios = ? AND pass = ? LIMIT 1',
-        [usuario, pass],
-      );
-      await conn.close();
-
-      if (results.isEmpty) return -1;
-      return int.parse(results.first[0].toString());
-    } catch (e) {
-      debugPrint('Error login: $e');
-      return -1;
     }
   }
 
