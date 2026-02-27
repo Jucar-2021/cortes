@@ -6,6 +6,7 @@ import 'bauchers_clientes/efecticard.dart';
 import 'bauchers_clientes/clientes.dart';
 import 'package:cortes/administrador/notifTelegram/configApi.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -30,6 +31,7 @@ class _DatoCorteState extends State<DatoCorte> {
   late String user;
   late int idUsuario;
   late String producto;
+
   late TextEditingController _ventaController;
   final TextEditingController _depositosController = TextEditingController();
   final TextEditingController _buzonController = TextEditingController();
@@ -45,14 +47,52 @@ class _DatoCorteState extends State<DatoCorte> {
 
   bool _guardando = false;
 
+  SharedPreferences? _prefs;
+  bool _prefsReady = false;
+
+  // ======== FORMATO DINERO ========
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+
+  String _fmt(double valor) => _currencyFormat.format(valor);
+
+  // Key con contexto (evita mezclar datos entre usuarios/fechas/producto)
+  String _k(String key) => '${key}_${idUsuario}_${fecha}_$producto';
+
   @override
   void initState() {
     super.initState();
+
     fecha = widget.fecha;
     user = widget.user;
     idUsuario = widget.idUsuario;
     producto = widget.tipoZonaCorte;
+
     _ventaController = TextEditingController();
+
+    _initPrefsAndLoad();
+  }
+
+  Future<void> _initPrefsAndLoad() async {
+    _prefs = await SharedPreferences.getInstance();
+
+    // Cargar valores texto
+    _ventaController.text = _prefs!.getString(_k('ventaDia')) ?? '';
+    _depositosController.text = _prefs!.getString(_k('depositosCajero')) ?? '';
+    _buzonController.text = _prefs!.getString(_k('buzon')) ?? '';
+    _gastosController.text = _prefs!.getString(_k('gastos')) ?? '';
+
+    // Cargar totales
+    _totalSantander = _prefs!.getDouble(_k('totalSantander')) ?? 0.0;
+    _totalMifel = _prefs!.getDouble(_k('totalMifel')) ?? 0.0;
+    _totalEfecticar = _prefs!.getDouble(_k('totalEfecticar')) ?? 0.0;
+    _totalClientes = _prefs!.getDouble(_k('totalClientes')) ?? 0.0;
+
+    _prefsReady = true;
+
+    _recalcularTotal();
+
+    if (mounted) setState(() {});
   }
 
   @override
@@ -83,12 +123,28 @@ class _DatoCorteState extends State<DatoCorte> {
     });
   }
 
-  // ======== FORMATO DINERO ========
-  final NumberFormat _currencyFormat =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
+  Future<void> _saveString(String key, String value) async {
+    if (!_prefsReady || _prefs == null) return;
+    await _prefs!.setString(_k(key), value);
+  }
 
-  String _fmt(double valor) {
-    return _currencyFormat.format(valor);
+  Future<void> _saveDouble(String key, double value) async {
+    if (!_prefsReady || _prefs == null) return;
+    await _prefs!.setDouble(_k(key), value);
+  }
+
+  Future<void> _clearDraft() async {
+    if (!_prefsReady || _prefs == null) return;
+
+    await _prefs!.remove(_k('ventaDia'));
+    await _prefs!.remove(_k('depositosCajero'));
+    await _prefs!.remove(_k('buzon'));
+    await _prefs!.remove(_k('gastos'));
+
+    await _prefs!.remove(_k('totalSantander'));
+    await _prefs!.remove(_k('totalMifel'));
+    await _prefs!.remove(_k('totalEfecticar'));
+    await _prefs!.remove(_k('totalClientes'));
   }
 
   // ======== NAVEGAR A PANTALLAS DE BAUCHERS ========
@@ -107,6 +163,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
     if (resultado != null) {
       setState(() => _totalSantander = resultado);
+      await _saveDouble('totalSantander', resultado);
       _recalcularTotal();
     }
   }
@@ -126,6 +183,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
     if (resultado != null) {
       setState(() => _totalMifel = resultado);
+      await _saveDouble('totalMifel', resultado);
       _recalcularTotal();
     }
   }
@@ -145,13 +203,12 @@ class _DatoCorteState extends State<DatoCorte> {
 
     if (resultado != null) {
       setState(() => _totalEfecticar = resultado);
+      await _saveDouble('totalEfecticar', resultado);
       _recalcularTotal();
     }
   }
 
   Future<void> _editarClientes() async {
-    // OJO: aquí estabas mandando MifelBauchersPage también.
-    // Si tienes una pantalla de clientes, cámbiala.
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
@@ -166,22 +223,25 @@ class _DatoCorteState extends State<DatoCorte> {
 
     if (resultado != null) {
       setState(() => _totalClientes = resultado);
+      await _saveDouble('totalClientes', resultado);
       _recalcularTotal();
     }
   }
 
-  // ======== BOTÓN GUARDAR (CORRECTO) ========
+  // ======== BOTÓN GUARDAR ========
   Future<void> _onGuardarPressed() async {
     if (_guardando) return;
 
     final venta = double.tryParse(_ventaController.text) ?? 0;
-    final santander = _totalSantander;
-    final mifel = _totalMifel;
-    final efecticar = _totalEfecticar;
     final depositos = double.tryParse(_depositosController.text) ?? 0;
     final buzon = double.tryParse(_buzonController.text) ?? 0;
     final gastos = double.tryParse(_gastosController.text) ?? 0;
+
+    final santander = _totalSantander;
+    final mifel = _totalMifel;
+    final efecticar = _totalEfecticar;
     final clientes = _totalClientes;
+
     final total = totalFinal;
 
     if (venta == 0) {
@@ -210,12 +270,16 @@ class _DatoCorteState extends State<DatoCorte> {
         total,
         producto,
       );
+
       await _enviarCorteTelegram();
+
+      // ✅ Limpia borrador local cuando guardó exitosamente
+      await _clearDraft();
 
       if (!mounted) return;
       setState(() => _guardando = false);
 
-      Navigator.pop(context); // ✅ solo al terminar
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       setState(() => _guardando = false);
@@ -288,11 +352,10 @@ class _DatoCorteState extends State<DatoCorte> {
       gastos: gastos,
       clientes: clientes,
       efectivoEntregado: total,
-      // OJO: aquí también, para compatibilidad con tu función actual. Si tu función ya tiene producto, úsalo directamente.
     );
   }
 
-  // Funcion para enviar corte por Telegram}
+  // ======== ENVIAR A TELEGRAM ========
   Future<void> _enviarCorteTelegram() async {
     final mensaje = '''
 <b>⛽ CORTE DE TURNO</b>
@@ -327,7 +390,6 @@ class _DatoCorteState extends State<DatoCorte> {
 
 🟢 <b>TOTAL EFECTIVO:</b>
 💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal)}</b>
-
 ''';
 
     await _corteTelegram.enviarNotificacion(mensaje);
@@ -350,8 +412,6 @@ class _DatoCorteState extends State<DatoCorte> {
         ),
         centerTitle: true,
       ),
-
-      // ✅ IMPORTANTE: Stack para overlay
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -371,7 +431,10 @@ class _DatoCorteState extends State<DatoCorte> {
                     labelText: "Venta del día",
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (_) => _recalcularTotal(),
+                  onChanged: (value) async {
+                    await _saveString('ventaDia', value);
+                    _recalcularTotal();
+                  },
                 ),
                 const SizedBox(height: 20),
                 const Text("Tarjetas",
@@ -420,7 +483,10 @@ class _DatoCorteState extends State<DatoCorte> {
                     labelText: "Depósitos Cajero",
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (_) => _recalcularTotal(),
+                  onChanged: (value) async {
+                    await _saveString('depositosCajero', value);
+                    _recalcularTotal();
+                  },
                 ),
                 const SizedBox(height: 10),
                 TextField(
@@ -432,7 +498,10 @@ class _DatoCorteState extends State<DatoCorte> {
                     labelText: "Buzón",
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (_) => _recalcularTotal(),
+                  onChanged: (value) async {
+                    await _saveString('buzon', value);
+                    _recalcularTotal();
+                  },
                 ),
                 const SizedBox(height: 10),
                 TextField(
@@ -444,7 +513,10 @@ class _DatoCorteState extends State<DatoCorte> {
                     labelText: "Gastos",
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (_) => _recalcularTotal(),
+                  onChanged: (value) async {
+                    await _saveString('gastos', value);
+                    _recalcularTotal();
+                  },
                 ),
                 const SizedBox(height: 20),
                 const Text("Clientes",
