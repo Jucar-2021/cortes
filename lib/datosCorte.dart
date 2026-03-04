@@ -273,7 +273,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
       await _enviarCorteTelegram();
 
-      // ✅ Limpia borrador local cuando guardó exitosamente
+      // Limpia borrador local cuando guardó exitosamente
       await _clearDraft();
 
       if (!mounted) return;
@@ -363,15 +363,15 @@ class _DatoCorteState extends State<DatoCorte> {
 
 ━━━━━━━━━━━━━━━━━━
 
-📦 <b>Producto:</b> <code>$producto</code>
+⛽ <b>Producto:</b> <code>$producto</code>
 📅 <b>Fecha:</b> <b>$fecha</b>
 ━━━━━━━━━━━━━━━━━━
 
 💰 <b>Venta del día:</b> ${_fmt(double.tryParse(_ventaController.text) ?? 0)}
 
-🏦 <b>Santander:</b> ${_fmt(_totalSantander)}
+♨️ <b>Santander:</b> ${_fmt(_totalSantander)}
 🏦 <b>Mifel:</b> ${_fmt(_totalMifel)}
-🏦 <b>Efecticar:</b> ${_fmt(_totalEfecticar)}
+💳 <b>Efecticar:</b> ${_fmt(_totalEfecticar)}
 
 ━━━━━━━━━━━━━━━━━━
 
