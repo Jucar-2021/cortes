@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cortes/Db.dart';
 import 'package:intl/intl.dart';
+import '../api/consumoPHP.dart';
+import '/api/santander_api.dart';
 
 class _BaucherItem {
   final int? idSantander; // null = aún no existe en BD
@@ -41,10 +43,16 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
 
+// ===================== API & USERAPI =====================
+  late final ApiService apiService;
+  late final SantanderApi santanderApi;
+
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
+    apiService = ApiService();
+    santanderApi = SantanderApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -77,9 +85,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final db = Db();
-
-      final rows = await db.obtenerSantanderPorUsuarioFecha(
+      final rows = await santanderApi.obtenerTarjetasSantander(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
         producto: widget.producto, // compatibilidad con tu llamada actual
@@ -172,8 +178,9 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    final db = Db();
-    await db.insertarSantander(
+    final ApiService apiService = ApiService();
+    final SantanderApi santanderApi = SantanderApi(apiService);
+    await santanderApi.registrarTarjetasSantander(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -182,8 +189,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    final db = Db();
-    await db.reemplazarSantanderPorUsuarioFecha(
+    await santanderApi.actualizarTarjetasSantander(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -254,8 +260,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
     }
 
     try {
-      final db = Db();
-      await db.eliminarSantanderPorId(item.idSantander!);
+      await santanderApi.eliminarTarjetaSantander(item.idSantander!);
 
       if (!mounted) return;
 
@@ -289,12 +294,19 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   @override
   Widget build(BuildContext context) {
     if (_errorCarga != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      final msg = _errorCarga!;
+
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorCarga!)),
+          SnackBar(content: Text(msg)),
         );
+
+        setState(() {
+          _errorCarga = null;
+        });
       });
-      _errorCarga = null;
     }
 
     return Scaffold(

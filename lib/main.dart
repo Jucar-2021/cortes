@@ -1,9 +1,10 @@
 import 'package:cortes/administrador/homeAdmin.dart';
+import 'package:cortes/api/consumoPHP.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'captura.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'api/consumoPHP.dart';
+import 'api/user_api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,7 +89,9 @@ class _CortesState extends State<Cortes> {
 
   bool _loginLoading = false; // solo visual, tu lógica sigue igual
 
-  final ApiService api = ApiService();
+// ===================== API & USERAPI =====================
+  final ApiService apiService = ApiService();
+  late final UserApi userApi = UserApi(apiService);
 
   @override
   void initState() {
@@ -97,10 +100,11 @@ class _CortesState extends State<Cortes> {
     pass.text = "";
     claveAcceso.text = "";
 
-    api.fetchData('config.php').then((data) {
-      debugPrint('Respuesta API->: $data');
-    }).catchError((error) {
-      debugPrint('Error al llamar API: $error');
+    // Si quieres probar conexión, mejor un endpoint real (ping.php)
+    apiService.postJson('ping.php', {}).then((data) {
+      debugPrint('Ping: $data');
+    }).catchError((e) {
+      debugPrint('Error ping: $e');
     });
   }
 
@@ -120,7 +124,7 @@ class _CortesState extends State<Cortes> {
 
     setState(() => _loginLoading = true);
 
-    final idUsuario = await api.validarUsuario(user, pwd);
+    final idUsuario = await userApi.validarUsuario(user, pwd);
     print("idUsuario recibido: $idUsuario");
 
     if (!mounted) return;
