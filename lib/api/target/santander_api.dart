@@ -1,15 +1,15 @@
-import 'consumoPHP.dart';
+import '../consumoPHP.dart';
 
-class EfecticardApi {
+class SantanderApi {
   final ApiService api;
-  EfecticardApi(this.api);
+  SantanderApi(this.api);
 
-  Future<List<Map<String, dynamic>>> obtenerTarjetasEfecticard({
+  Future<List<Map<String, dynamic>>> obtenerTarjetasSantander({
     required int idUsuario,
     required String fecha,
     required String producto,
   }) async {
-    final res = await api.postJson('Efecticard/obtener.php', {
+    final res = await api.postJson('Santander/obtener.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
@@ -24,14 +24,14 @@ class EfecticardApi {
     }
   }
 
-  // registro de targetas efecticard
-  Future<void> registrarTarjetasEfecticard({
+  // registro de targetas santander
+  Future<void> registrarTarjetasSantander({
     required int idUsuario,
     required String fecha,
     required List<double> importes,
     required String producto,
   }) async {
-    await api.postJson('Efecticard/registrar.php', {
+    await api.postJson('Santander/registrar.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
@@ -39,14 +39,14 @@ class EfecticardApi {
     });
   }
 
-  // Actualizacion de tarjeta efecticard
-  Future<void> actualizarTarjetasEfecticard({
+  // Actualizacion de tarjeta santander
+  Future<void> actualizarTarjetasSantander({
     required int idUsuario,
     required String fecha,
     required List<double> importes,
     required String producto,
   }) async {
-    await api.postJson('Efecticard/actualizar.php', {
+    await api.postJson('Santander/actualizar.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
@@ -54,10 +54,10 @@ class EfecticardApi {
     });
   }
 
-  // Eliminacion de tarjeta efecticard
-  Future<void> eliminarTarjetaEfecticard(int idEfecticard) async {
-    await api.postJson('Efecticard/eliminar.php', {
-      'idEfecticard': idEfecticard,
+  // Eliminacion de tarjeta santander
+  Future<void> eliminarTarjetaSantander(int idSantander) async {
+    await api.postJson('Santander/eliminar.php', {
+      'idSantander': idSantander,
     });
   }
 }

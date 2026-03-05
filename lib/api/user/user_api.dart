@@ -1,4 +1,4 @@
-import 'consumoPHP.dart';
+import '../consumoPHP.dart';
 
 class UserApi {
   final ApiService api;

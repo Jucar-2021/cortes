@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '/api/efecticard_api.dart';
+import '../api/target/efecticard_api.dart';
 
 class _BaucherItem {
   final int? idEfecticar; // null = aún no existe en BD
@@ -103,9 +103,9 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
         _yaExistia = true;
 
         for (final r in rows) {
-          final idEfecticar = r['idEfecticar'] as int;
+          final idEfecticard = r['idEfecticard'] as int;
           final importe = (r['importe'] as num).toDouble();
-          _items.add(_itemDesdeBD(idEfecticar: idEfecticar, importe: importe));
+          _items.add(_itemDesdeBD(idEfecticar: idEfecticard, importe: importe));
         }
       } else {
         _yaExistia = false;

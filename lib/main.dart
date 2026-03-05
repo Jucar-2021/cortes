@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'captura.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'api/user_api.dart';
+import 'api/user/user_api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -20,7 +20,7 @@ class NotificacionesTelegram {
         body: jsonEncode({
           'chat_id': chatId,
           'text': mensaje,
-          'parse_mode': 'HTML', // 🔥 ESTA ES LA CLAVE
+          'parse_mode': 'HTML', //  ESTA ES LA CLAVE
           'disable_web_page_preview': true,
         }),
       );

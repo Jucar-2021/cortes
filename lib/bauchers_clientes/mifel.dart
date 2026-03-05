@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '/api/mifel_api.dart';
+import '../api/target/mifel_api.dart';
 
 class _BaucherItem {
   final int? idMifel; // null = aún no existe en BD

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cortes/api/consumoPHP.dart';
-import '/api/user_api.dart';
+import '../../api/user/user_api.dart';
 
 class Registro extends StatelessWidget {
   const Registro({super.key});
