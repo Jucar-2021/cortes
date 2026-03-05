@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cortes/Db.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
 import '/api/santander_api.dart';
@@ -296,7 +295,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
     if (_errorCarga != null) {
       final msg = _errorCarga!;
 
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -311,14 +310,9 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Bauchers Santander',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        title: const Text(
+          'Bauchers Santander',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -376,7 +370,8 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
                                     skipTraversal: true,
                                     child: IconButton(
                                       tooltip: 'Eliminar',
-                                      icon: const Icon(Icons.delete,
+                                      icon: const Icon(
+                                          Icons.delete_forever_outlined,
                                           color: Colors.red),
                                       onPressed: _guardando
                                           ? null
