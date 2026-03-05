@@ -309,9 +309,9 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
         title: const Text(
           'Efecticard',
           style: TextStyle(
-              fontSize: 18,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 216, 103, 10)),
+              color: Color.fromARGB(255, 251, 113, 0)),
         ),
         centerTitle: true,
       ),

@@ -536,16 +536,21 @@ class _DatoCorteState extends State<DatoCorte> {
                 Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: totalFinal > 0
+                        ? Colors.yellowAccent
+                        : Colors.tealAccent,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    "Diferencia a entregar: ${_fmt(totalFinal)}",
+                    totalFinal < 0
+                        ? "Diferencia a entregar: ${_fmt(totalFinal)} (SOBRANTE)"
+                        : "Diferencia a entregar: ${_fmt(totalFinal)}",
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 22,
+                    style: TextStyle(
+                      fontSize: 25,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: totalFinal > 0 ? Colors.red : Colors.blue,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 ),

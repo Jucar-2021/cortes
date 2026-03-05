@@ -313,7 +313,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
         title: const Text(
           '♨️ Bauchers Santander',
           style: TextStyle(
-              fontSize: 18,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(255, 226, 28, 14)),
         ),
