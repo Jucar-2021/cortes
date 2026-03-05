@@ -403,11 +403,13 @@ class _DatoCorteState extends State<DatoCorte> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              "Datos del Corte",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              "Desglose de Corte",
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
-            Text("Usuario: $user"),
-            Text("Fecha: $fecha"),
+            Text("Usuario: $user",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            Text("Fecha: $fecha",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ],
         ),
         centerTitle: true,
