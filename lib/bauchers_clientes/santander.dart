@@ -205,7 +205,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
 
     final importes = _obtenerImportesValidos();
 
-    // ✅ NUEVO: si no hay importes, regresar sin pedir nada
+    // si no hay importes, regresar sin pedir nada
     if (importes.isEmpty) {
       Navigator.pop<double>(context, _total);
       return;
@@ -311,8 +311,11 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Bauchers Santander',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          '♨️ Bauchers Santander',
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 226, 28, 14)),
         ),
         centerTitle: true,
       ),

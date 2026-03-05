@@ -203,7 +203,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
     final importes = _obtenerImportesValidos();
 
-    // ✅ NUEVO: si no hay importes, regresar sin pedir nada
+    // si no hay importes, regresar sin pedir nada
     if (importes.isEmpty) {
       Navigator.pop<double>(context, _total);
       return;
@@ -306,14 +306,12 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Bauchers Efecticard',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        title: const Text(
+          'Efecticard',
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 216, 103, 10)),
         ),
         centerTitle: true,
       ),

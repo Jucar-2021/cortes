@@ -300,14 +300,12 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Bauchers Mifel',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        title: const Text(
+          'Bauchers Mifel',
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 10, 92, 216)),
         ),
         centerTitle: true,
       ),
