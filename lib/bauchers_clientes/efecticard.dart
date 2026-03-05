@@ -369,7 +369,8 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
                                     skipTraversal: true,
                                     child: IconButton(
                                       tooltip: 'Eliminar',
-                                      icon: const Icon(Icons.delete,
+                                      icon: const Icon(
+                                          Icons.delete_forever_outlined,
                                           color: Colors.red),
                                       onPressed: _guardando
                                           ? null
