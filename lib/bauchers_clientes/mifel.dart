@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cortes/Db.dart';
 import 'package:intl/intl.dart';
+import '../api/consumoPHP.dart';
+import '/api/mifel_api.dart';
 
 class _BaucherItem {
   final int? idMifel; // null = aún no existe en BD
@@ -41,10 +42,16 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
 
+  // ===================== API & USERAPI =====================
+  late final ApiService apiService;
+  late final MifelApi mifelApi;
+
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
+    apiService = ApiService();
+    mifelApi = MifelApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -76,9 +83,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final db = Db();
-
-      final rows = await db.obtenerMifelPorUsuarioFecha(
+      final rows = await mifelApi.obtenerTarjetasMifel(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
         producto: widget.producto, // compatibilidad con tu llamada actual
@@ -171,8 +176,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    final db = Db();
-    await db.insertarMifel(
+    await mifelApi.registrarTarjetasMifel(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -181,8 +185,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    final db = Db();
-    await db.reemplazarMifelPorUsuarioFecha(
+    await mifelApi.actualizarTarjetasMifel(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -253,8 +256,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
     }
 
     try {
-      final db = Db();
-      await db.eliminarMifelPorId(item.idMifel!);
+      await mifelApi.eliminarTarjetaMifel(item.idMifel!);
 
       if (!mounted) return;
 

@@ -1,15 +1,15 @@
 import 'consumoPHP.dart';
 
-class MifelApi {
+class EfecticardApi {
   final ApiService api;
-  MifelApi(this.api);
+  EfecticardApi(this.api);
 
-  Future<List<Map<String, dynamic>>> obtenerTarjetasMifel({
+  Future<List<Map<String, dynamic>>> obtenerTarjetasEfecticard({
     required int idUsuario,
     required String fecha,
     required String producto,
   }) async {
-    final res = await api.postJson('Mifel/obtener.php', {
+    final res = await api.postJson('Efecticard/obtener.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
@@ -24,14 +24,14 @@ class MifelApi {
     }
   }
 
-  // registro de targetas mifel
-  Future<void> registrarTarjetasMifel({
+  // registro de targetas efecticard
+  Future<void> registrarTarjetasEfecticard({
     required int idUsuario,
     required String fecha,
     required List<double> importes,
     required String producto,
   }) async {
-    await api.postJson('Mifel/registrar.php', {
+    await api.postJson('Efecticard/registrar.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
@@ -39,14 +39,14 @@ class MifelApi {
     });
   }
 
-  // Actualizacion de tarjeta mifel
-  Future<void> actualizarTarjetasMifel({
+  // Actualizacion de tarjeta efecticard
+  Future<void> actualizarTarjetasEfecticard({
     required int idUsuario,
     required String fecha,
     required List<double> importes,
     required String producto,
   }) async {
-    await api.postJson('Mifel/actualizar.php', {
+    await api.postJson('Efecticard/actualizar.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
@@ -54,10 +54,10 @@ class MifelApi {
     });
   }
 
-  // Eliminacion de tarjeta mifel
-  Future<void> eliminarTarjetaMifel(int idMifel) async {
-    await api.postJson('Mifel/eliminar.php', {
-      'idMifel': idMifel,
+  // Eliminacion de tarjeta efecticard
+  Future<void> eliminarTarjetaEfecticard(int idEfecticard) async {
+    await api.postJson('Efecticard/eliminar.php', {
+      'idEfecticard': idEfecticard,
     });
   }
 }

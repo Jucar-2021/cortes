@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cortes/Db.dart';
 import 'package:intl/intl.dart';
+import '../api/consumoPHP.dart';
+import '/api/efecticard_api.dart';
 
 class _BaucherItem {
   final int? idEfecticar; // null = aún no existe en BD
@@ -41,10 +42,16 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
 
+  // ===================== API & USERAPI =====================
+  late final ApiService apiService;
+  late final EfecticardApi efecticardApi;
+
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
+    apiService = ApiService();
+    efecticardApi = EfecticardApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -77,9 +84,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final db = Db();
-
-      final rows = await db.obtenerEfecticardPorUsuarioFecha(
+      final rows = await efecticardApi.obtenerTarjetasEfecticard(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
         producto: widget.producto, // compatibilidad con tu llamada actual
@@ -172,8 +177,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    final db = Db();
-    await db.insertarEfecticard(
+    await efecticardApi.registrarTarjetasEfecticard(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -182,8 +186,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    final db = Db();
-    await db.reemplazarEfecticardPorUsuarioFecha(
+    await efecticardApi.actualizarTarjetasEfecticard(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -254,8 +257,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
     }
 
     try {
-      final db = Db();
-      await db.eliminarEfecticardPorId(item.idEfecticar!);
+      await efecticardApi.eliminarTarjetaEfecticard(item.idEfecticar!);
 
       if (!mounted) return;
 
