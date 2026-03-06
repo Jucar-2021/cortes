@@ -14,25 +14,28 @@ class _ClientesItem {
   });
 }
 
-class ClientesBauchersPage extends StatefulWidget {
+class ClientesCapturaPage extends StatefulWidget {
   final int idUsuario;
+  final int idCliente;
+  final String razonSocial;
   final String fecha; // "dd/MM/yyyy"
-  final String
-      producto; // nuevo campo para compatibilidad con tu función actual
+  final String producto;
 
-  const ClientesBauchersPage({
+  const ClientesCapturaPage({
     super.key,
     required this.idUsuario,
+    required this.idCliente,
+    required this.razonSocial,
     required this.fecha,
     required String user,
-    required this.producto, // compatibilidad con tu llamada actual
+    required this.producto,
   });
 
   @override
-  State<ClientesBauchersPage> createState() => _ClientesBauchersPageState();
+  State<ClientesCapturaPage> createState() => _ClientesCapturaPageState();
 }
 
-class _ClientesBauchersPageState extends State<ClientesBauchersPage> {
+class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
   final List<_ClientesItem> _items = [];
   double _total = 0;
   bool _cargando = true;

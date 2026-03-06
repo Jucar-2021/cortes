@@ -1,12 +1,13 @@
-import 'package:cortes/Db.dart';
 import 'package:flutter/material.dart';
-import 'bauchers_clientes/santander.dart';
-import 'bauchers_clientes/mifel.dart';
-import 'bauchers_clientes/efecticard.dart';
-import 'bauchers_clientes/clientes.dart';
+import 'bauchers/santander.dart';
+import 'bauchers/mifel.dart';
+import 'bauchers/efecticard.dart';
+import 'clientes/listadoClientes.dart';
 import 'package:cortes/administrador/notifTelegram/configApi.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'api/guardarCorte_api.dart';
+import 'api/consumoPHP.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -212,7 +213,7 @@ class _DatoCorteState extends State<DatoCorte> {
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
-        builder: (_) => ClientesBauchersPage(
+        builder: (_) => Listadoclientes(
           fecha: fecha,
           user: user,
           idUsuario: widget.idUsuario,
@@ -253,12 +254,12 @@ class _DatoCorteState extends State<DatoCorte> {
 
     FocusScope.of(context).unfocus();
     setState(() => _guardando = true);
-
     try {
       await _guardarCorte(
         fecha,
         idUsuario,
         user,
+        producto,
         venta,
         santander,
         mifel,
@@ -268,7 +269,6 @@ class _DatoCorteState extends State<DatoCorte> {
         gastos,
         clientes,
         total,
-        producto,
       );
 
       await _enviarCorteTelegram();
@@ -324,7 +324,8 @@ class _DatoCorteState extends State<DatoCorte> {
   Future<void> _guardarCorte(
     String fecha,
     int idUsuario,
-    String user,
+    String usuario,
+    String producto,
     double venta,
     double santander,
     double mifel,
@@ -334,11 +335,10 @@ class _DatoCorteState extends State<DatoCorte> {
     double gastos,
     double clientes,
     double total,
-    String producto,
   ) async {
-    final db = Db();
+    final corteApi = CorteApi(ApiService());
 
-    await db.insertarCorte(
+    await corteApi.guardarCorte(
       fecha: fecha,
       idUsuario: idUsuario,
       usuario: user,
@@ -362,32 +362,29 @@ class _DatoCorteState extends State<DatoCorte> {
 👤 <b>$user</b>
 
 ━━━━━━━━━━━━━━━━━━
-
 ⛽ <b>Producto:</b> <code>$producto</code>
 📅 <b>Fecha:</b> <b>$fecha</b>
 ━━━━━━━━━━━━━━━━━━
-
 💰 <b>Venta del día:</b> ${_fmt(double.tryParse(_ventaController.text) ?? 0)}
 
 ♨️ <b>Santander:</b> ${_fmt(_totalSantander)}
+
 🏦 <b>Mifel:</b> ${_fmt(_totalMifel)}
+
 💳 <b>Efecticar:</b> ${_fmt(_totalEfecticar)}
-
-━━━━━━━━━━━━━━━━━━
-
-🏧 <b>Depósitos Cajero:</b> ${_fmt(double.tryParse(_depositosController.text) ?? 0)}
-📥 <b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
-🧾 <b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
 
 👥 <b>Total clientes:</b> ${_fmt(_totalClientes)}
 
 ━━━━━━━━━━━━━━━━━━
+🏧 <b>Depósitos Cajero:</b> ${_fmt(double.tryParse(_depositosController.text) ?? 0)}
+📥 <b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
+🧾 <b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
 
+━━━━━━━━━━━━━━━━━━
 🔴 <b>DIFERENCIA A ENTREGAR:</b>
 💵 <b>${_fmt(totalFinal)}</b>
 
 ━━━━━━━━━━━━━━━━━━
-
 🟢 <b>TOTAL EFECTIVO:</b>
 💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal)}</b>
 ''';
