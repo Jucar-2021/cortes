@@ -57,7 +57,7 @@ class _IngresoState extends State<Ingreso> {
     if (fecha != null && mounted) {
       setState(() {
         _fechaSeleccionada = fecha;
-        _fechaSelec.text = DateFormat('dd/MM/yyyy').format(fecha);
+        _fechaSelec.text = DateFormat('yyyy/MM/dd').format(fecha);
       });
     }
   }
@@ -232,7 +232,9 @@ class _IngresoState extends State<Ingreso> {
                                   RadioListTile<String>(
                                     title: const Text("Gasolina"),
                                     value: "Gasolina",
+                                    // ignore: deprecated_member_use
                                     groupValue: tipoZonaCorte,
+                                    // ignore: deprecated_member_use
                                     onChanged: (value) =>
                                         setState(() => tipoZonaCorte = value),
                                   ),
@@ -241,6 +243,7 @@ class _IngresoState extends State<Ingreso> {
                                     title: const Text("Diésel"),
                                     value: "Diesel",
                                     groupValue: tipoZonaCorte,
+                                    // ignore: deprecated_member_use
                                     onChanged: (value) =>
                                         setState(() => tipoZonaCorte = value),
                                   ),
@@ -272,6 +275,7 @@ class _IngresoState extends State<Ingreso> {
                       "Consejo: si capturas siempre al cierre, elige la fecha del día.",
                       style: TextStyle(
                         fontSize: 12,
+                        // ignore: deprecated_member_use
                         color: cs.onSurface.withOpacity(0.55),
                       ),
                       textAlign: TextAlign.center,

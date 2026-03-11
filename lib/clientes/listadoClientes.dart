@@ -94,7 +94,7 @@ class _ListadoclientesState extends State<Listadoclientes> {
               final String saldo = _formatearSaldo(cliente['saldoTotal'] ?? 0);
 
               return Card(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: 10),
                 elevation: 3,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -132,13 +132,12 @@ class _ListadoclientesState extends State<Listadoclientes> {
                                   idUsuario: widget.idUsuario,
                                   fecha: widget.fecha,
                                   producto: widget.producto,
-                                  user: widget.user,
                                 ),
                               ),
                             );
                           },
-                          icon: const Icon(Icons.remove_circle_outline),
-                          label: const Text('Retirar'),
+                          icon: const Icon(Icons.edit_document),
+                          label: const Text('Capturar'),
                         ),
                       ),
                     ],

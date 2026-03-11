@@ -18,7 +18,7 @@ class ClientesCapturaPage extends StatefulWidget {
   final int idUsuario;
   final int idCliente;
   final String razonSocial;
-  final String fecha; // "dd/MM/yyyy"
+  final String fecha; // "yyyy/MM/dd"
   final String producto;
 
   const ClientesCapturaPage({
@@ -27,7 +27,6 @@ class ClientesCapturaPage extends StatefulWidget {
     required this.idCliente,
     required this.razonSocial,
     required this.fecha,
-    required String user,
     required this.producto,
   });
 
@@ -43,6 +42,12 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
 
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
+
+  late int idUsuario = widget.idUsuario;
+  late int idCliente = widget.idCliente;
+  late String razonSocial = widget.razonSocial;
+  late String fecha = widget.fecha; // "yyyy/MM/dd"
+  late String producto = widget.producto;
 
   @override
   void initState() {
