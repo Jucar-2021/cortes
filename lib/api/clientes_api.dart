@@ -21,7 +21,7 @@ class ClientesApi {
     required String fecha,
     required String producto,
   }) async {
-    final res = await api.postJson('Clientes/consumo.php', {
+    final res = await api.postJson('Clientes/obtener.php', {
       'idCliente': idCliente,
       'idUsuario': idUsuario,
       'fecha': fecha,
@@ -35,5 +35,47 @@ class ClientesApi {
     } else {
       throw Exception('Respuesta inesperada: "data" no es una lista');
     }
+  }
+
+  Future<void> registrarClientes({
+    required int idUsuario,
+    required int idCliente,
+    required String razonSocial,
+    required String fecha,
+    required List<double> importes,
+    required String producto,
+  }) async {
+    await api.postJson('Clientes/registrar.php', {
+      'idUsuario': idUsuario,
+      'idCliente': idCliente,
+      'razonSocial': razonSocial,
+      'fecha': fecha,
+      'importes': importes,
+      'producto': producto,
+    });
+  }
+
+  Future<void> actualizarClientes({
+    required int idUsuario,
+    required int idCliente,
+    required String razonSocial,
+    required String fecha,
+    required List<double> importes,
+    required String producto,
+  }) async {
+    await api.postJson('Clientes/actualizar.php', {
+      'idUsuario': idUsuario,
+      'idCliente': idCliente,
+      'razonSocial': razonSocial,
+      'fecha': fecha,
+      'importes': importes,
+      'producto': producto,
+    });
+  }
+
+  Future<void> eliminarImporteCliente(int idConsumo) async {
+    await api.postJson('Clientes/eliminar.php', {
+      'idConsumo': idConsumo,
+    });
   }
 }

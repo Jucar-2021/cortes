@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cortes/Db.dart';
 import 'package:intl/intl.dart';
+import '../api/consumoPHP.dart';
+import '../api/clientes_api.dart';
 
 class _ClientesItem {
   final int? idCliente; // null = aún no existe en BD
@@ -43,6 +45,9 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
 
+  late final ApiService apiService;
+  late final ClientesApi clientesApi;
+
   late int idUsuario = widget.idUsuario;
   late int idCliente = widget.idCliente;
   late String razonSocial = widget.razonSocial;
@@ -53,6 +58,8 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
+    apiService = ApiService();
+    clientesApi = ClientesApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -85,13 +92,12 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final db = Db();
-
-      final rows = await db.obtenerClientePorUsuarioFecha(
-        idUsuario: widget.idUsuario,
-        fecha: widget.fecha,
-        producto: widget
-            .producto, // nuevo campo para compatibilidad con tu función actual
+      final rows = await clientesApi.getClienteconsumo(
+        idCliente: idCliente,
+        idUsuario: idUsuario,
+        fecha: fecha,
+        producto:
+            producto, // nuevo campo para compatibilidad con tu función actual
       );
 
       if (!mounted) return;
@@ -107,9 +113,9 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
         _yaExistia = true;
 
         for (final r in rows) {
-          final idCliente = r['idCliente'] as int;
+          final idConsumo = r['idConsumo'] as int;
           final importe = (r['importe'] as num).toDouble();
-          _items.add(_itemDesdeBD(idCliente: idCliente, importe: importe));
+          _items.add(_itemDesdeBD(idCliente: idConsumo, importe: importe));
         }
       } else {
         _yaExistia = false;
@@ -121,7 +127,7 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
       _recalcularTotal();
     } catch (e) {
       if (!mounted) return;
-      _errorCarga = 'Error al cargar bauchers: $e';
+      _errorCarga = 'Error al cargar clientes: $e';
     } finally {
       if (!mounted) return;
       setState(() => _cargando = false);
@@ -181,21 +187,23 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    final db = Db();
-    await db.insertarCliente(
-      idUsuario: widget.idUsuario,
-      fecha: widget.fecha,
+    await clientesApi.registrarClientes(
+      idUsuario: idUsuario,
+      idCliente: idCliente,
+      razonSocial: razonSocial,
+      fecha: fecha,
       importes: importes,
-      producto: widget
-          .producto, // nuevo campo para compatibilidad con tu función actual
+      producto:
+          producto, // nuevo campo para compatibilidad con tu función actual
     );
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    final db = Db();
-    await db.reemplazarClientePorUsuarioFecha(
-      idUsuario: widget.idUsuario,
-      fecha: widget.fecha,
+    await clientesApi.actualizarClientes(
+      idUsuario: idUsuario,
+      idCliente: idCliente,
+      razonSocial: razonSocial,
+      fecha: fecha,
       importes: importes,
       producto: widget
           .producto, // nuevo campo para compatibilidad con tu función actual
@@ -265,8 +273,7 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
     }
 
     try {
-      final db = Db();
-      await db.eliminarClientePorId(item.idCliente!);
+      await clientesApi.eliminarImporteCliente(item.idCliente!);
 
       if (!mounted) return;
 
@@ -300,12 +307,15 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
   @override
   Widget build(BuildContext context) {
     if (_errorCarga != null) {
+      final mensaje = _errorCarga!;
+      _errorCarga = null;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorCarga!)),
+          SnackBar(content: Text(mensaje)),
         );
       });
-      _errorCarga = null;
     }
 
     return Scaffold(
