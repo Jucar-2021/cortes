@@ -26,6 +26,8 @@ class _ListadoclientesState extends State<Listadoclientes> {
   late final ClientesApi clientesApi;
   late Future<List<Map<String, dynamic>>> _futureClientes;
 
+  List<Map<String, dynamic>> _clientes = [];
+
   @override
   void initState() {
     super.initState();
@@ -37,10 +39,36 @@ class _ListadoclientesState extends State<Listadoclientes> {
     try {
       final clientes = await clientesApi.getClientes();
       debugPrint("Clientes obtenidos: $clientes");
-      return clientes;
+      _clientes = List<Map<String, dynamic>>.from(clientes);
+      return _clientes;
     } catch (e) {
       debugPrint('Error al obtener clientes: $e');
       return [];
+    }
+  }
+
+  Future<void> _abrirCapturaCliente({
+    required int index,
+    required int idCliente,
+    required String razonSocial,
+  }) async {
+    final total = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ClientesCapturaPage(
+          idCliente: idCliente,
+          razonSocial: razonSocial,
+          idUsuario: widget.idUsuario,
+          fecha: widget.fecha,
+          producto: widget.producto,
+        ),
+      ),
+    );
+
+    if (total != null && mounted) {
+      setState(() {
+        _clientes[index]['saldoTotal'] = total;
+      });
     }
   }
 
@@ -73,13 +101,13 @@ class _ListadoclientesState extends State<Listadoclientes> {
             );
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if ((!snapshot.hasData || snapshot.data!.isEmpty) && _clientes.isEmpty) {
             return const Center(
               child: Text('No se encontraron clientes'),
             );
           }
 
-          final clientes = snapshot.data!;
+          final clientes = _clientes.isNotEmpty ? _clientes : snapshot.data!;
 
           return ListView.builder(
             padding: const EdgeInsets.all(12),
@@ -122,18 +150,11 @@ class _ListadoclientesState extends State<Listadoclientes> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ClientesCapturaPage(
-                                  idCliente: idCliente,
-                                  razonSocial: razonSocial,
-                                  idUsuario: widget.idUsuario,
-                                  fecha: widget.fecha,
-                                  producto: widget.producto,
-                                ),
-                              ),
+                          onPressed: () async {
+                            await _abrirCapturaCliente(
+                              index: index,
+                              idCliente: idCliente,
+                              razonSocial: razonSocial,
                             );
                           },
                           icon: const Icon(Icons.edit_document),
