@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiService {
   final String baseUrl = dotenv.env['API_BASE_URL'] ?? '';
 
-  Uri _uri(String endpoint) => Uri.parse('$baseUrl/$endpoint');
+  Uri _uri(String endpoint) => Uri.parse('/api/$baseUrl/$endpoint');
 
   Future<Map<String, dynamic>> postJson(
     String endpoint,

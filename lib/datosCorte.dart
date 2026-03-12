@@ -3,10 +3,10 @@ import 'bauchers/santander.dart';
 import 'bauchers/mifel.dart';
 import 'bauchers/efecticard.dart';
 import 'clientes/listadoClientes.dart';
-import 'package:cortes/administrador/notifTelegram/configApi.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api/guardarCorte_api.dart';
+import 'api/telegramSend_api.dart';
 import 'api/consumoPHP.dart';
 
 class DatoCorte extends StatefulWidget {
@@ -48,7 +48,7 @@ class _DatoCorteState extends State<DatoCorte> {
   final TextEditingController _gastosController = TextEditingController();
   final TextEditingController _ajustedepController = TextEditingController();
 
-  final NotificacionesTelegram _corteTelegram = NotificacionesTelegram();
+  final TelegramApi _corteTelegram = TelegramApi(ApiService());
 
   double _totalSantander = 0;
   double _totalMifel = 0;
@@ -406,7 +406,7 @@ class _DatoCorteState extends State<DatoCorte> {
 💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal + (double.tryParse(_ajustedepController.text) ?? 0))}</b>
 ''';
 
-    await _corteTelegram.enviarNotificacion(mensaje);
+    await _corteTelegram.sendMessage(mensaje);
   }
 
   @override

@@ -9,7 +9,7 @@ import 'api/user/user_api.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await dotenv.load(fileName: ".env");
+    await dotenv.load(fileName: "assets/env.txt");
   } catch (e) {
     debugPrint("ERROR cargando .env: $e");
   }
