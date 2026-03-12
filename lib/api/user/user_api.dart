@@ -4,27 +4,33 @@ class UserApi {
   final ApiService api;
   UserApi(this.api);
 
-  Future<bool> registrarUsuario(String usuarios, String pass) async {
+  Future<bool> registrarUsuario(String usuario, String pass, String nombre,
+      String apellidoPaterno, String apellidoMaterno) async {
     await api.postJson('User/registrar.php', {
-      'usuarios': usuarios,
+      'usuario': usuario,
       'pass': pass,
+      'nombre': nombre,
+      'apellidoPaterno': apellidoPaterno,
+      'apellidoMaterno': apellidoMaterno,
     });
     return true; // si postJson no lanza excepción, fue ok
   }
 
-  Future<int> validarUsuario(String usuario, String pass) async {
+  Future<Map<String, dynamic>?> validarUsuario(
+      String usuario, String pass) async {
     try {
       final res = await api.postJson('User/validar.php', {
-        'usuarios': usuario,
+        'usuario': usuario,
         'pass': pass,
       });
 
-      final id = res['idUsuario'];
-      if (id is int) return id;
-      if (id is String) return int.tryParse(id) ?? -1;
-      return -1;
+      if (res['ok'] == true) {
+        return res;
+      }
+
+      return null;
     } catch (_) {
-      return -1;
+      return null;
     }
   }
 }

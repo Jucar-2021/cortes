@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/clientes_api.dart';
+import '../api/client/clientes_api.dart';
 import '../api/consumoPHP.dart';
 import 'clientes.dart';
 
@@ -41,6 +41,7 @@ class _ListadoclientesState extends State<Listadoclientes> {
   void initState() {
     super.initState();
     clientesApi = ClientesApi(apiService);
+
     _futureClientes = _initPage();
   }
 

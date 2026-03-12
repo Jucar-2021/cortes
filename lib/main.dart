@@ -57,9 +57,18 @@ class MyApp extends StatelessWidget {
 
           final usuario = args?['usuario'] as String? ?? '';
           final idUsuario = args?['idUsuario'] as int? ?? 0;
+          final nombre = args?['nombre'] as String? ?? '';
+          final apellidoPaterno = args?['apellidoPaterno'] as String? ?? '';
+          final apellidoMaterno = args?['apellidoMaterno'] as String? ?? '';
 
           return MaterialPageRoute(
-            builder: (_) => Captura(usuario: usuario, idUsuario: idUsuario),
+            builder: (_) => Captura(
+              usuario: usuario,
+              idUsuario: idUsuario,
+              nombre: nombre,
+              apellidoPaterno: apellidoPaterno,
+              apellidoMaterno: apellidoMaterno,
+            ),
           );
         }
         return null;
@@ -124,17 +133,32 @@ class _CortesState extends State<Cortes> {
 
     setState(() => _loginLoading = true);
 
-    final idUsuario = await userApi.validarUsuario(user, pwd);
-    print("idUsuario recibido: $idUsuario");
+    final datosUsuario = await userApi.validarUsuario(user, pwd);
 
     if (!mounted) return;
     setState(() => _loginLoading = false);
 
-    if (idUsuario != -1) {
+    if (datosUsuario != null) {
+      final idUsuario = datosUsuario['idUsuario'];
+      final usuarioLogin = datosUsuario['usuario'];
+      final nombre = datosUsuario['nombre'];
+      final apellidoPaterno = datosUsuario['apellidoPaterno'];
+      final apellidoMaterno = datosUsuario['apellidoMaterno'];
+
+      final nom = "$nombre";
+      final paterno = "$apellidoPaterno";
+      final materno = "$apellidoMaterno";
+
       Navigator.pushReplacementNamed(
         context,
         '/captura',
-        arguments: {'usuario': user, 'idUsuario': idUsuario},
+        arguments: {
+          'usuario': usuarioLogin,
+          'idUsuario': idUsuario,
+          'nombre': nom,
+          'apellidoPaterno': paterno,
+          'apellidoMaterno': materno,
+        },
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

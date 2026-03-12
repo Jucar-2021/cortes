@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/clientes_api.dart';
+import '../api/client/clientes_api.dart';
 
 class _ClientesItem {
   final int? idCliente; // null = aún no existe en BD

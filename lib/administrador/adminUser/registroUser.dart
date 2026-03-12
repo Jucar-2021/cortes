@@ -22,6 +22,9 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController usuarios = TextEditingController();
+  final TextEditingController nombre = TextEditingController();
+  final TextEditingController apellidoPaterno = TextEditingController();
+  final TextEditingController apellidoMaterno = TextEditingController();
   final TextEditingController pass = TextEditingController();
   final TextEditingController pass2 = TextEditingController();
 
@@ -36,6 +39,9 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
   void initState() {
     super.initState();
     usuarios.text = "";
+    nombre.text = "";
+    apellidoPaterno.text = "";
+    apellidoMaterno.text = "";
     pass.text = "";
     pass2.text = "";
   }
@@ -61,6 +67,9 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
       final success = await userApi.registrarUsuario(
         usuarios.text.trim(),
         pass.text.trim(),
+        nombre.text.trim(),
+        apellidoPaterno.text.trim(),
+        apellidoMaterno.text.trim(),
       );
 
       if (!mounted) return;
@@ -166,6 +175,90 @@ class _NuevoUsuarioState extends State<NuevoUsuario> {
                           ),
 
                           const SizedBox(height: 16),
+
+                          // NOMBRE
+                          TextFormField(
+                            keyboardType: TextInputType.text,
+                            onChanged: (value) =>
+                                nombre.text = value.toUpperCase(),
+                            controller: nombre,
+                            maxLength: 50,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              counterText: "",
+                              labelText: "Nombre",
+                              hintText: "Ej: Juan",
+                              prefixIcon: const Icon(Icons.person),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            validator: (v) {
+                              final value = (v ?? '').trim();
+                              if (value.isEmpty) {
+                                return 'Ingresa un nombre';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // APELLIDO PATERNO
+                          TextFormField(
+                            keyboardType: TextInputType.text,
+                            onChanged: (value) =>
+                                apellidoPaterno.text = value.toUpperCase(),
+                            controller: apellidoPaterno,
+                            maxLength: 50,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              counterText: "",
+                              labelText: "Apellido Paterno",
+                              hintText: "Ej: Pérez",
+                              prefixIcon: const Icon(Icons.person),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            validator: (v) {
+                              final value = (v ?? '').trim();
+                              if (value.isEmpty) {
+                                return 'Ingresa un apellido paterno';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // APELLIDO MATERNO
+                          TextFormField(
+                            keyboardType: TextInputType.text,
+                            onChanged: (value) =>
+                                apellidoMaterno.text = value.toUpperCase(),
+                            controller: apellidoMaterno,
+                            maxLength: 50,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              counterText: "",
+                              labelText: "Apellido Materno",
+                              hintText: "Ej: López",
+                              prefixIcon: const Icon(Icons.person),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            validator: (v) {
+                              final value = (v ?? '').trim();
+                              if (value.isEmpty) {
+                                return 'Ingresa un apellido materno';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 12),
 
                           // USUARIO
                           TextFormField(

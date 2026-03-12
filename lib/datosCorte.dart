@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api/guardarCorte_api.dart';
 import 'api/consumoPHP.dart';
-import 'clientes/listadoClientes.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -17,12 +16,18 @@ class DatoCorte extends StatefulWidget {
     required this.user,
     required this.idUsuario,
     required this.tipoZonaCorte,
+    required this.nombre,
+    required this.apellidoPaterno,
+    required this.apellidoMaterno,
   });
 
   final String fecha;
   final String user;
   final int idUsuario;
   final String tipoZonaCorte;
+  final String nombre;
+  final String apellidoPaterno;
+  final String apellidoMaterno;
 
   @override
   State<DatoCorte> createState() => _DatoCorteState();
@@ -33,11 +38,15 @@ class _DatoCorteState extends State<DatoCorte> {
   late String user;
   late int idUsuario;
   late String producto;
+  late String nombre;
+  late String apellidoPaterno;
+  late String apellidoMaterno;
 
   late TextEditingController _ventaController;
   final TextEditingController _depositosController = TextEditingController();
   final TextEditingController _buzonController = TextEditingController();
   final TextEditingController _gastosController = TextEditingController();
+  final TextEditingController _ajustedepController = TextEditingController();
 
   final NotificacionesTelegram _corteTelegram = NotificacionesTelegram();
 
@@ -69,6 +78,9 @@ class _DatoCorteState extends State<DatoCorte> {
     user = widget.user;
     idUsuario = widget.idUsuario;
     producto = widget.tipoZonaCorte;
+    nombre = widget.nombre;
+    apellidoPaterno = widget.apellidoPaterno;
+    apellidoMaterno = widget.apellidoMaterno;
 
     _ventaController = TextEditingController();
 
@@ -83,7 +95,7 @@ class _DatoCorteState extends State<DatoCorte> {
     _depositosController.text = _prefs!.getString(_k('depositosCajero')) ?? '';
     _buzonController.text = _prefs!.getString(_k('buzon')) ?? '';
     _gastosController.text = _prefs!.getString(_k('gastos')) ?? '';
-
+    _ajustedepController.text = _prefs!.getString(_k('ajustedep')) ?? '';
     // Cargar totales
     _totalSantander = _prefs!.getDouble(_k('totalSantander')) ?? 0.0;
     _totalMifel = _prefs!.getDouble(_k('totalMifel')) ?? 0.0;
@@ -112,6 +124,7 @@ class _DatoCorteState extends State<DatoCorte> {
     final dep = double.tryParse(_depositosController.text) ?? 0;
     final buz = double.tryParse(_buzonController.text) ?? 0;
     final gas = double.tryParse(_gastosController.text) ?? 0;
+    final ajusteDep = double.tryParse(_ajustedepController.text) ?? 0;
 
     setState(() {
       totalFinal = venta -
@@ -121,7 +134,8 @@ class _DatoCorteState extends State<DatoCorte> {
           _totalClientes -
           dep -
           buz -
-          gas;
+          gas -
+          ajusteDep;
     });
   }
 
@@ -142,7 +156,7 @@ class _DatoCorteState extends State<DatoCorte> {
     await _prefs!.remove(_k('depositosCajero'));
     await _prefs!.remove(_k('buzon'));
     await _prefs!.remove(_k('gastos'));
-
+    await _prefs!.remove(_k('ajustedep'));
     await _prefs!.remove(_k('totalSantander'));
     await _prefs!.remove(_k('totalMifel'));
     await _prefs!.remove(_k('totalEfecticar'));
@@ -235,9 +249,11 @@ class _DatoCorteState extends State<DatoCorte> {
     if (_guardando) return;
 
     final venta = double.tryParse(_ventaController.text) ?? 0;
-    final depositos = double.tryParse(_depositosController.text) ?? 0;
+    final depcajero = double.tryParse(_depositosController.text) ?? 0;
+    final depAjus = double.tryParse(_ajustedepController.text) ?? 0;
     final buzon = double.tryParse(_buzonController.text) ?? 0;
     final gastos = double.tryParse(_gastosController.text) ?? 0;
+    final depositos = depcajero + depAjus;
 
     final santander = _totalSantander;
     final mifel = _totalMifel;
@@ -342,7 +358,7 @@ class _DatoCorteState extends State<DatoCorte> {
     await corteApi.guardarCorte(
       fecha: fecha,
       idUsuario: idUsuario,
-      usuario: user,
+      usuario: "$nombre $apellidoPaterno $apellidoMaterno",
       producto: producto,
       venta: venta,
       santander: santander,
@@ -360,7 +376,7 @@ class _DatoCorteState extends State<DatoCorte> {
   Future<void> _enviarCorteTelegram() async {
     final mensaje = '''
 <b>⛽ CORTE DE TURNO</b>
-👤 <b>$user</b>
+👤 <b>$nombre $apellidoPaterno $apellidoMaterno</b>
 
 ━━━━━━━━━━━━━━━━━━
 ⛽ <b>Producto:</b> <code>$producto</code>
@@ -377,7 +393,7 @@ class _DatoCorteState extends State<DatoCorte> {
 👥 <b>Total clientes:</b> ${_fmt(_totalClientes)}
 
 ━━━━━━━━━━━━━━━━━━
-🏧 <b>Depósitos Cajero:</b> ${_fmt(double.tryParse(_depositosController.text) ?? 0)}
+🏧 <b>Depósitos Cajero:</b> ${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_ajustedepController.text) ?? 0))}
 📥 <b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
 🧾 <b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
 
@@ -387,7 +403,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
 ━━━━━━━━━━━━━━━━━━
 🟢 <b>TOTAL EFECTIVO:</b>
-💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal)}</b>
+💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal + (double.tryParse(_ajustedepController.text) ?? 0))}</b>
 ''';
 
     await _corteTelegram.enviarNotificacion(mensaje);
@@ -400,13 +416,13 @@ class _DatoCorteState extends State<DatoCorte> {
         title: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Desglose de Corte",
+            Text(
+              "$nombre $apellidoPaterno $apellidoMaterno",
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
-            Text("Usuario: $user",
+            Text("Captura de corte $producto con fecha:",
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            Text("Fecha: $fecha",
+            Text(_formatoFecha(fecha),
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ],
         ),
@@ -470,6 +486,19 @@ class _DatoCorteState extends State<DatoCorte> {
                     ),
                   ),
                 ),
+                const Text("Clientes",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Card(
+                  child: ListTile(
+                    title: const Text("Total clientes"),
+                    subtitle: Text(_fmt(_totalClientes)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: _guardando ? null : _editarClientes,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 const Text("Otros movimientos",
                     style:
@@ -519,18 +548,22 @@ class _DatoCorteState extends State<DatoCorte> {
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text("Clientes",
+                const Text("Ajuste para cerrar depositos en cajero",
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Card(
-                  child: ListTile(
-                    title: const Text("Total clientes"),
-                    subtitle: Text(_fmt(_totalClientes)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: _guardando ? null : _editarClientes,
-                    ),
+                TextField(
+                  controller: _ajustedepController,
+                  enabled: !_guardando,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: "Depósito final para entregar",
+                    border: OutlineInputBorder(),
                   ),
+                  onChanged: (value) async {
+                    await _saveString('depositosCajero', value);
+                    _recalcularTotal();
+                  },
                 ),
                 const SizedBox(height: 30),
                 Container(
@@ -557,7 +590,14 @@ class _DatoCorteState extends State<DatoCorte> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _guardando ? null : _onGuardarPressed,
-                  child: const Text("Guardar Corte"),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text("Guardar Corte"),
+                      SizedBox(width: 8),
+                      Icon(Icons.save_rounded),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 30),
               ],
@@ -567,5 +607,21 @@ class _DatoCorteState extends State<DatoCorte> {
         ],
       ),
     );
+  }
+
+  //formato de fecha DD/MM/YYYY
+  String _formatoFecha(String fecha) {
+    try {
+      final partes = fecha.split('/');
+      if (partes.length != 3) return fecha;
+
+      final an = partes[0];
+      final mes = partes[1];
+      final dia = partes[2];
+
+      return '$dia/$mes/$an';
+    } catch (e) {
+      return fecha;
+    }
   }
 }

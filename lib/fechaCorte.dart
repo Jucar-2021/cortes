@@ -5,18 +5,41 @@ import 'datosCorte.dart';
 class Captura extends StatelessWidget {
   final String usuario;
   final int idUsuario;
-  const Captura({super.key, required this.usuario, required this.idUsuario});
+  final String nombre;
+  final String apellidoPaterno;
+  final String apellidoMaterno;
+  const Captura(
+      {super.key,
+      required this.usuario,
+      required this.idUsuario,
+      required this.nombre,
+      required this.apellidoPaterno,
+      required this.apellidoMaterno});
 
   @override
   Widget build(BuildContext context) {
-    return Ingreso(usuario: usuario, idUsuario: idUsuario);
+    return Ingreso(
+        usuario: usuario,
+        idUsuario: idUsuario,
+        nombre: nombre,
+        apellidoPaterno: apellidoPaterno,
+        apellidoMaterno: apellidoMaterno);
   }
 }
 
 class Ingreso extends StatefulWidget {
-  const Ingreso({super.key, required this.usuario, required this.idUsuario});
+  const Ingreso(
+      {super.key,
+      required this.usuario,
+      required this.idUsuario,
+      required this.nombre,
+      required this.apellidoPaterno,
+      required this.apellidoMaterno});
   final String usuario;
   final int idUsuario;
+  final String nombre;
+  final String apellidoPaterno;
+  final String apellidoMaterno;
 
   @override
   State<Ingreso> createState() => _IngresoState();
@@ -24,17 +47,23 @@ class Ingreso extends StatefulWidget {
 
 class _IngresoState extends State<Ingreso> {
   final TextEditingController _fechaSelec = TextEditingController();
+  final TextEditingController _fechaVisual = TextEditingController();
   DateTime? _fechaSeleccionada;
   String? tipoZonaCorte;
 
   late String user;
   late int idUsuario;
-
+  late String nombre;
+  late String apellidoPaterno;
+  late String apellidoMaterno;
   @override
   void initState() {
     super.initState();
     user = widget.usuario;
     idUsuario = widget.idUsuario;
+    nombre = widget.nombre;
+    apellidoPaterno = widget.apellidoPaterno;
+    apellidoMaterno = widget.apellidoMaterno;
   }
 
   @override
@@ -57,7 +86,13 @@ class _IngresoState extends State<Ingreso> {
     if (fecha != null && mounted) {
       setState(() {
         _fechaSeleccionada = fecha;
+
+        // valor real
         _fechaSelec.text = DateFormat('yyyy/MM/dd').format(fecha);
+
+        // valor visual
+        _fechaVisual.text =
+            DateFormat("d 'de' MMMM 'del' yyyy", 'es_MX').format(fecha);
       });
     }
   }
@@ -87,6 +122,9 @@ class _IngresoState extends State<Ingreso> {
           fecha: fecha,
           user: user,
           idUsuario: idUsuario,
+          nombre: nombre,
+          apellidoPaterno: apellidoPaterno,
+          apellidoMaterno: apellidoMaterno,
           tipoZonaCorte: tipoZonaCorte!,
         ),
       ),
@@ -98,7 +136,7 @@ class _IngresoState extends State<Ingreso> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // ✅ Esto ayuda cuando aparece teclado
+      // Esto ayuda cuando aparece teclado
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 2,
@@ -109,11 +147,11 @@ class _IngresoState extends State<Ingreso> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Cortes Despachador",
+              "Fecha de corte",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             Text(
-              "Usuario: $user",
+              "Bienvenido: $nombre $apellidoPaterno $apellidoMaterno",
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ],
@@ -127,6 +165,7 @@ class _IngresoState extends State<Ingreso> {
             },
           ),
         ],
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -189,7 +228,7 @@ class _IngresoState extends State<Ingreso> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             TextField(
-                              controller: _fechaSelec,
+                              controller: _fechaVisual,
                               readOnly: true,
                               onTap: _seleccionarFecha,
                               decoration: InputDecoration(
