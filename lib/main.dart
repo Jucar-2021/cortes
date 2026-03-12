@@ -3,16 +3,10 @@ import 'package:cortes/api/consumoPHP.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'fechaCorte.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'api/user/user_api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await dotenv.load(fileName: "assets/env.txt");
-  } catch (e) {
-    debugPrint("ERROR cargando .env: $e");
-  }
   runApp(const MyApp());
 }
 

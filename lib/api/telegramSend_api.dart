@@ -8,7 +8,7 @@ class TelegramApi {
   Future<void> sendMessage(String mensaje) async {
     try {
       await api.postJson(
-        'api/Telegram/send.php',
+        'avisos/enviar.php',
         {
           'mensaje': mensaje,
         },

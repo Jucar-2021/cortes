@@ -58,7 +58,7 @@ class _ListadoclientesState extends State<Listadoclientes> {
   Future<List<Map<String, dynamic>>> fetchClientes() async {
     try {
       final clientes = await clientesApi.getClientes();
-      debugPrint("Clientes obtenidos: $clientes");
+
       _clientes = List<Map<String, dynamic>>.from(clientes);
       return _clientes;
     } catch (e) {

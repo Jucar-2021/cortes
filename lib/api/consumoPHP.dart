@@ -1,11 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
-  final String baseUrl = dotenv.env['API_BASE_URL'] ?? '';
+  final String baseUrl = 'https://dev-soluciones.com/api';
 
-  Uri _uri(String endpoint) => Uri.parse('/api/$baseUrl/$endpoint');
+  Uri _uri(String endpoint) => Uri.parse('$baseUrl/$endpoint');
 
   Future<Map<String, dynamic>> postJson(
     String endpoint,
