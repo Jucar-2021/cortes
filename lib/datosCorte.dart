@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api/guardarCorte_api.dart';
 import 'api/consumoPHP.dart';
+import 'clientes/listadoClientes.dart';
 
 class DatoCorte extends StatefulWidget {
   const DatoCorte({
@@ -294,7 +295,7 @@ class _DatoCorteState extends State<DatoCorte> {
   Widget _overlayGuardando() {
     return Positioned.fill(
       child: Container(
-        color: Colors.black.withOpacity(0.25),
+        color: const Color.fromARGB(255, 82, 80, 80),
         child: Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),

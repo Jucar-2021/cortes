@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cortes/Db.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
 import '../api/clientes_api.dart';
@@ -244,7 +243,8 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
       setState(() => _guardando = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al registrar vouchers: $e')),
+        SnackBar(
+            content: Text('Error al registrar importes de $razonSocial: $e')),
       );
     }
   }
@@ -323,12 +323,13 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
         title: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Consumo Clientes',
+            Text(
+              '$razonSocial',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
+        automaticallyImplyLeading: false,
         centerTitle: true,
       ),
       body: _cargando
@@ -339,9 +340,8 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-                      const Text(
-                        'Ingresa los importes de clientes.\n'
-                        'Presiona "Siguiente" para brincar al siguiente campo.',
+                      Text(
+                        'Importes de cargas: $razonSocial.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -402,7 +402,7 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(0.08),
+                          color: const Color.fromARGB(255, 192, 234, 255),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -410,7 +410,7 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                            color: Color.fromARGB(255, 2, 92, 219),
                           ),
                         ),
                       ),

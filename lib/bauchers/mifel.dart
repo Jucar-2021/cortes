@@ -202,7 +202,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
 
     final importes = _obtenerImportesValidos();
 
-    // ✅ NUEVO: si no hay importes, regresar sin pedir nada
+    // NUEVO: si no hay importes, regresar sin pedir nada
     if (importes.isEmpty) {
       Navigator.pop<double>(context, _total);
       return;
@@ -381,6 +381,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
+                          // ignore: deprecated_member_use
                           color: Colors.blueAccent.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
