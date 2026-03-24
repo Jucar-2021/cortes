@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'bauchers/santander.dart';
-import 'bauchers/mifel.dart';
-import 'bauchers/efecticard.dart';
+import 'doc_tar_depCaj/cajero.dart' show DepositosCajeroPage;
+import 'doc_tar_depCaj/santander.dart';
+import 'doc_tar_depCaj/mifel.dart';
+import 'doc_tar_depCaj/efecticard.dart';
 import 'clientes/listadoClientes.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,10 +44,10 @@ class _DatoCorteState extends State<DatoCorte> {
   late String apellidoMaterno;
 
   late TextEditingController _ventaController;
-  final TextEditingController _depositosController = TextEditingController();
   final TextEditingController _buzonController = TextEditingController();
   final TextEditingController _gastosController = TextEditingController();
-  final TextEditingController _ajustedepController = TextEditingController();
+  final TextEditingController _billetesController = TextEditingController();
+  final TextEditingController _monedasController = TextEditingController();
 
   final TelegramApi _corteTelegram = TelegramApi(ApiService());
 
@@ -54,6 +55,7 @@ class _DatoCorteState extends State<DatoCorte> {
   double _totalMifel = 0;
   double _totalEfecticar = 0;
   double _totalClientes = 0;
+  double _totalCajero = 0;
   double totalFinal = 0;
 
   bool _guardando = false;
@@ -92,14 +94,14 @@ class _DatoCorteState extends State<DatoCorte> {
 
     // Cargar valores texto
     _ventaController.text = _prefs!.getString(_k('ventaDia')) ?? '';
-    _depositosController.text = _prefs!.getString(_k('depositosCajero')) ?? '';
     _buzonController.text = _prefs!.getString(_k('buzon')) ?? '';
     _gastosController.text = _prefs!.getString(_k('gastos')) ?? '';
-    _ajustedepController.text = _prefs!.getString(_k('ajustedep')) ?? '';
+
     // Cargar totales
     _totalSantander = _prefs!.getDouble(_k('totalSantander')) ?? 0.0;
     _totalMifel = _prefs!.getDouble(_k('totalMifel')) ?? 0.0;
     _totalEfecticar = _prefs!.getDouble(_k('totalEfecticar')) ?? 0.0;
+    _totalCajero = _prefs!.getDouble(_k('totalCajero')) ?? 0.0;
     _totalClientes = _prefs!.getDouble(_k('totalClientes')) ?? 0.0;
 
     _prefsReady = true;
@@ -112,19 +114,21 @@ class _DatoCorteState extends State<DatoCorte> {
   @override
   void dispose() {
     _ventaController.dispose();
-    _depositosController.dispose();
     _buzonController.dispose();
     _gastosController.dispose();
+    _billetesController.dispose();
+    _monedasController.dispose();
     super.dispose();
   }
 
   // ======== RECALCULAR TOTAL ========
   void _recalcularTotal() {
     final venta = double.tryParse(_ventaController.text) ?? 0;
-    final dep = double.tryParse(_depositosController.text) ?? 0;
+
     final buz = double.tryParse(_buzonController.text) ?? 0;
     final gas = double.tryParse(_gastosController.text) ?? 0;
-    final ajusteDep = double.tryParse(_ajustedepController.text) ?? 0;
+    final billetes = double.tryParse(_billetesController.text) ?? 0;
+    final monedas = double.tryParse(_monedasController.text) ?? 0;
 
     setState(() {
       totalFinal = venta -
@@ -132,10 +136,11 @@ class _DatoCorteState extends State<DatoCorte> {
           _totalMifel -
           _totalEfecticar -
           _totalClientes -
-          dep -
+          _totalCajero -
           buz -
           gas -
-          ajusteDep;
+          billetes -
+          monedas;
     });
   }
 
@@ -153,7 +158,7 @@ class _DatoCorteState extends State<DatoCorte> {
     if (!_prefsReady || _prefs == null) return;
 
     await _prefs!.remove(_k('ventaDia'));
-    await _prefs!.remove(_k('depositosCajero'));
+    await _prefs!.remove(_k('totalCajero'));
     await _prefs!.remove(_k('buzon'));
     await _prefs!.remove(_k('gastos'));
     await _prefs!.remove(_k('ajustedep'));
@@ -161,6 +166,8 @@ class _DatoCorteState extends State<DatoCorte> {
     await _prefs!.remove(_k('totalMifel'));
     await _prefs!.remove(_k('totalEfecticar'));
     await _prefs!.remove(_k('totalClientes'));
+    await _prefs!.remove(_k('billetes'));
+    await _prefs!.remove(_k('monedas'));
   }
 
   // ======== NAVEGAR A PANTALLAS DE BAUCHERS ========
@@ -224,6 +231,26 @@ class _DatoCorteState extends State<DatoCorte> {
     }
   }
 
+  Future<void> _editarDepositosCajero() async {
+    final resultado = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DepositosCajeroPage(
+          fecha: fecha,
+          user: user,
+          idUsuario: widget.idUsuario,
+          producto: producto,
+        ),
+      ),
+    );
+
+    if (resultado != null) {
+      setState(() => _totalCajero = resultado);
+      await _saveDouble('totalCajero', resultado);
+      _recalcularTotal();
+    }
+  }
+
   Future<void> _editarClientes() async {
     final resultado = await Navigator.push<double>(
       context,
@@ -249,18 +276,18 @@ class _DatoCorteState extends State<DatoCorte> {
     if (_guardando) return;
 
     final venta = double.tryParse(_ventaController.text) ?? 0;
-    final depcajero = double.tryParse(_depositosController.text) ?? 0;
-    final depAjus = double.tryParse(_ajustedepController.text) ?? 0;
+    final billetes = double.tryParse(_billetesController.text) ?? 0;
+    final monedas = double.tryParse(_monedasController.text) ?? 0;
     final buzon = double.tryParse(_buzonController.text) ?? 0;
     final gastos = double.tryParse(_gastosController.text) ?? 0;
-    final depositos = depcajero + depAjus;
+    final depositos = _totalCajero;
 
     final santander = _totalSantander;
     final mifel = _totalMifel;
     final efecticar = _totalEfecticar;
     final clientes = _totalClientes;
 
-    final total = totalFinal;
+    final total = totalFinal + billetes + monedas;
 
     if (venta == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -393,17 +420,19 @@ class _DatoCorteState extends State<DatoCorte> {
 👥 <b>Total clientes:</b> ${_fmt(_totalClientes)}
 
 ━━━━━━━━━━━━━━━━━━
-🏧 <b>Depósitos Cajero:</b> ${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_ajustedepController.text) ?? 0))}
+🏧 <b>Depósitos Cajero:</b> ${_fmt((_totalCajero))}
 📥 <b>Buzón:</b> ${_fmt(double.tryParse(_buzonController.text) ?? 0)}
 🧾 <b>Gastos:</b> ${_fmt(double.tryParse(_gastosController.text) ?? 0)}
 
 ━━━━━━━━━━━━━━━━━━
-🔴 <b>DIFERENCIA A ENTREGAR:</b>
-💵 <b>${_fmt(totalFinal)}</b>
+🔴 <b>TOTAL ENTREGADO:</b>
+🟰 <b>${_fmt((totalFinal) + (double.tryParse(_billetesController.text) ?? 0) + (double.tryParse(_monedasController.text) ?? 0))}</b>
 
+💵 <b>Billetes: ${_fmt(double.tryParse(_billetesController.text) ?? 0)}</b>
+💰 <b>Monedas: ${_fmt(double.tryParse(_monedasController.text) ?? 0)}</b>
 ━━━━━━━━━━━━━━━━━━
 🟢 <b>TOTAL EFECTIVO:</b>
-💰 <b>${_fmt((double.tryParse(_depositosController.text) ?? 0) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal + (double.tryParse(_ajustedepController.text) ?? 0))}</b>
+💰 <b>${_fmt((_totalCajero) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal + (double.tryParse(_billetesController.text) ?? 0) + (double.tryParse(_monedasController.text) ?? 0))}</b>
 ''';
 
     await _corteTelegram.sendMessage(mensaje);
@@ -503,19 +532,15 @@ class _DatoCorteState extends State<DatoCorte> {
                 const Text("Otros movimientos",
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                TextField(
-                  controller: _depositosController,
-                  enabled: !_guardando,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: "Depósitos Cajero",
-                    border: OutlineInputBorder(),
+                Card(
+                  child: ListTile(
+                    title: const Text("Depósitos en cajero"),
+                    subtitle: Text(_fmt(_totalCajero)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: _guardando ? null : _editarDepositosCajero,
+                    ),
                   ),
-                  onChanged: (value) async {
-                    await _saveString('depositosCajero', value);
-                    _recalcularTotal();
-                  },
                 ),
                 const SizedBox(height: 10),
                 TextField(
@@ -548,20 +573,35 @@ class _DatoCorteState extends State<DatoCorte> {
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text("Ajuste para cerrar depositos en cajero",
+                const Text("Detalle de efectivo entregado",
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 TextField(
-                  controller: _ajustedepController,
+                  controller: _billetesController,
                   enabled: !_guardando,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(
-                    labelText: "Depósito final para entregar",
+                    labelText: "Total Billetes",
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (value) async {
-                    await _saveString('depositosCajero', value);
+                    await _saveString('billetes', value);
+                    _recalcularTotal();
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _monedasController,
+                  enabled: !_guardando,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: "Total Monedas",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) async {
+                    await _saveString('monedas', value);
                     _recalcularTotal();
                   },
                 ),

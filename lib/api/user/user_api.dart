@@ -6,6 +6,7 @@ class UserApi {
 
   Future<bool> registrarUsuario(String usuario, String pass, String nombre,
       String apellidoPaterno, String apellidoMaterno) async {
+    print(api.baseUrl + '/User/registrar.php');
     await api.postJson('User/registrar.php', {
       'usuario': usuario,
       'pass': pass,

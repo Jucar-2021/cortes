@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/target/santander_api.dart';
+import '../api/doc_tar_depCaj/efecticard_api.dart';
 
 class _BaucherItem {
-  final int? idSantander; // null = aún no existe en BD
+  final int? idEfecticar; // null = aún no existe en BD
   final TextEditingController controller;
   final FocusNode focusNode;
 
   _BaucherItem({
-    required this.idSantander,
+    required this.idEfecticar,
     required this.controller,
     required this.focusNode,
   });
 }
 
-class SantanderBauchersPage extends StatefulWidget {
+class EfecticarBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
   final String producto; // compatibilidad con tu llamada actual
 
-  const SantanderBauchersPage({
+  const EfecticarBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
@@ -29,10 +29,10 @@ class SantanderBauchersPage extends StatefulWidget {
   });
 
   @override
-  State<SantanderBauchersPage> createState() => _SantanderBauchersPageState();
+  State<EfecticarBauchersPage> createState() => _EfecticarBauchersPageState();
 }
 
-class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
+class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   final List<_BaucherItem> _items = [];
 
   double _total = 0;
@@ -42,16 +42,16 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
 
-// ===================== API & USERAPI =====================
+  // ===================== API & USERAPI =====================
   late final ApiService apiService;
-  late final SantanderApi santanderApi;
+  late final EfecticardApi efecticardApi;
 
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
     apiService = ApiService();
-    santanderApi = SantanderApi(apiService);
+    efecticardApi = EfecticardApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -66,16 +66,16 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
 
   _BaucherItem _nuevoItemVacio() {
     return _BaucherItem(
-      idSantander: null,
+      idEfecticar: null,
       controller: TextEditingController(),
       focusNode: FocusNode(),
     );
   }
 
   _BaucherItem _itemDesdeBD(
-      {required int idSantander, required double importe}) {
+      {required int idEfecticar, required double importe}) {
     return _BaucherItem(
-      idSantander: idSantander,
+      idEfecticar: idEfecticar,
       controller: TextEditingController(text: importe.toStringAsFixed(2)),
       focusNode: FocusNode(),
     );
@@ -84,7 +84,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final rows = await santanderApi.obtenerTarjetasSantander(
+      final rows = await efecticardApi.obtenerTarjetasEfecticard(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
         producto: widget.producto, // compatibilidad con tu llamada actual
@@ -103,9 +103,9 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
         _yaExistia = true;
 
         for (final r in rows) {
-          final idSantander = r['idSantander'] as int;
+          final idEfecticard = r['idEfecticard'] as int;
           final importe = (r['importe'] as num).toDouble();
-          _items.add(_itemDesdeBD(idSantander: idSantander, importe: importe));
+          _items.add(_itemDesdeBD(idEfecticar: idEfecticard, importe: importe));
         }
       } else {
         _yaExistia = false;
@@ -177,9 +177,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    final ApiService apiService = ApiService();
-    final SantanderApi santanderApi = SantanderApi(apiService);
-    await santanderApi.registrarTarjetasSantander(
+    await efecticardApi.registrarTarjetasEfecticard(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -188,7 +186,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    await santanderApi.actualizarTarjetasSantander(
+    await efecticardApi.actualizarTarjetasEfecticard(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -247,7 +245,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
     if (esUltimoYVacio) return;
 
     // Si no existe en BD aún, solo quítalo de la lista
-    if (item.idSantander == null) {
+    if (item.idEfecticar == null) {
       setState(() {
         item.controller.dispose();
         item.focusNode.dispose();
@@ -259,7 +257,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
     }
 
     try {
-      await santanderApi.eliminarTarjetaSantander(item.idSantander!);
+      await efecticardApi.eliminarTarjetaEfecticard(item.idEfecticar!);
 
       if (!mounted) return;
 
@@ -271,7 +269,7 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
       });
 
       // si ya no hay registros reales en BD, cambia a Guardar
-      final quedanReales = _items.any((x) => x.idSantander != null);
+      final quedanReales = _items.any((x) => x.idEfecticar != null);
       _yaExistia = quedanReales;
 
       _recalcularTotal();
@@ -293,29 +291,27 @@ class _SantanderBauchersPageState extends State<SantanderBauchersPage> {
   @override
   Widget build(BuildContext context) {
     if (_errorCarga != null) {
-      final msg = _errorCarga!;
+      final msg = _errorCarga; // copia local
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
-
-        setState(() {
-          _errorCarga = null;
+      if (msg != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg)),
+          );
         });
-      });
+        _errorCarga = null;
+      }
     }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '♨️ Bauchers Santander',
+          'Efecticard',
           style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 226, 28, 14)),
+              color: Color.fromARGB(255, 251, 113, 0)),
         ),
         centerTitle: true,
       ),

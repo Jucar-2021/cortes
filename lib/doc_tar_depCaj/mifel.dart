@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/target/efecticard_api.dart';
+import '../api/doc_tar_depCaj/mifel_api.dart';
 
 class _BaucherItem {
-  final int? idEfecticar; // null = aún no existe en BD
+  final int? idMifel; // null = aún no existe en BD
   final TextEditingController controller;
   final FocusNode focusNode;
 
   _BaucherItem({
-    required this.idEfecticar,
+    required this.idMifel,
     required this.controller,
     required this.focusNode,
   });
 }
 
-class EfecticarBauchersPage extends StatefulWidget {
+class MifelBauchersPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
   final String producto; // compatibilidad con tu llamada actual
 
-  const EfecticarBauchersPage({
+  const MifelBauchersPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
@@ -29,10 +29,10 @@ class EfecticarBauchersPage extends StatefulWidget {
   });
 
   @override
-  State<EfecticarBauchersPage> createState() => _EfecticarBauchersPageState();
+  State<MifelBauchersPage> createState() => _MifelBauchersPageState();
 }
 
-class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
+class _MifelBauchersPageState extends State<MifelBauchersPage> {
   final List<_BaucherItem> _items = [];
 
   double _total = 0;
@@ -44,14 +44,14 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
   // ===================== API & USERAPI =====================
   late final ApiService apiService;
-  late final EfecticardApi efecticardApi;
+  late final MifelApi mifelApi;
 
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
     apiService = ApiService();
-    efecticardApi = EfecticardApi(apiService);
+    mifelApi = MifelApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -66,16 +66,15 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
   _BaucherItem _nuevoItemVacio() {
     return _BaucherItem(
-      idEfecticar: null,
+      idMifel: null,
       controller: TextEditingController(),
       focusNode: FocusNode(),
     );
   }
 
-  _BaucherItem _itemDesdeBD(
-      {required int idEfecticar, required double importe}) {
+  _BaucherItem _itemDesdeBD({required int idMifel, required double importe}) {
     return _BaucherItem(
-      idEfecticar: idEfecticar,
+      idMifel: idMifel,
       controller: TextEditingController(text: importe.toStringAsFixed(2)),
       focusNode: FocusNode(),
     );
@@ -84,7 +83,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final rows = await efecticardApi.obtenerTarjetasEfecticard(
+      final rows = await mifelApi.obtenerTarjetasMifel(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
         producto: widget.producto, // compatibilidad con tu llamada actual
@@ -103,9 +102,9 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
         _yaExistia = true;
 
         for (final r in rows) {
-          final idEfecticard = r['idEfecticard'] as int;
+          final idMifel = r['idMifel'] as int;
           final importe = (r['importe'] as num).toDouble();
-          _items.add(_itemDesdeBD(idEfecticar: idEfecticard, importe: importe));
+          _items.add(_itemDesdeBD(idMifel: idMifel, importe: importe));
         }
       } else {
         _yaExistia = false;
@@ -177,7 +176,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    await efecticardApi.registrarTarjetasEfecticard(
+    await mifelApi.registrarTarjetasMifel(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -186,7 +185,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    await efecticardApi.actualizarTarjetasEfecticard(
+    await mifelApi.actualizarTarjetasMifel(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
@@ -203,7 +202,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
 
     final importes = _obtenerImportesValidos();
 
-    // si no hay importes, regresar sin pedir nada
+    // NUEVO: si no hay importes, regresar sin pedir nada
     if (importes.isEmpty) {
       Navigator.pop<double>(context, _total);
       return;
@@ -245,7 +244,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
     if (esUltimoYVacio) return;
 
     // Si no existe en BD aún, solo quítalo de la lista
-    if (item.idEfecticar == null) {
+    if (item.idMifel == null) {
       setState(() {
         item.controller.dispose();
         item.focusNode.dispose();
@@ -257,7 +256,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
     }
 
     try {
-      await efecticardApi.eliminarTarjetaEfecticard(item.idEfecticar!);
+      await mifelApi.eliminarTarjetaMifel(item.idMifel!);
 
       if (!mounted) return;
 
@@ -269,7 +268,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
       });
 
       // si ya no hay registros reales en BD, cambia a Guardar
-      final quedanReales = _items.any((x) => x.idEfecticar != null);
+      final quedanReales = _items.any((x) => x.idMifel != null);
       _yaExistia = quedanReales;
 
       _recalcularTotal();
@@ -291,27 +290,22 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
   @override
   Widget build(BuildContext context) {
     if (_errorCarga != null) {
-      final msg = _errorCarga; // copia local
-
-      if (msg != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(msg)),
-          );
-        });
-        _errorCarga = null;
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_errorCarga!)),
+        );
+      });
+      _errorCarga = null;
     }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Efecticard',
+          'Mifel',
           style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 251, 113, 0)),
+              color: Color.fromARGB(255, 10, 92, 216)),
         ),
         centerTitle: true,
       ),
@@ -387,6 +381,7 @@ class _EfecticarBauchersPageState extends State<EfecticarBauchersPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
+                          // ignore: deprecated_member_use
                           color: Colors.blueAccent.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
