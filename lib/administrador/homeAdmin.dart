@@ -1,6 +1,8 @@
 import 'package:cortes/administrador/adminUser/registroUser.dart';
 import 'package:flutter/material.dart';
 
+import '../calendarios/verCortes.dart';
+
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
 
@@ -46,20 +48,25 @@ class HomeAdmin extends StatelessWidget {
             // ================= OPCIÓN FUTURA =================
             _adminButton(
               context,
-              icon: Icons.delete_forever,
-              label: "Reiniciar Sistema",
-              color: Colors.red,
+              icon: Icons.assignment,
+              label: "Visualizar Cortes",
+              color: Colors.deepPurple,
               onTap: () {
-                // futura función
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Cortes(),
+                  ),
+                );
               },
             ),
 
             // ================= OPCIÓN FUTURA =================
             _adminButton(
               context,
-              icon: Icons.analytics,
-              label: "Reportes",
-              color: Colors.deepPurple,
+              icon: Icons.delete_forever,
+              label: "Reiniciar Sistema",
+              color: Colors.red,
               onTap: () {
                 // futura función
               },
@@ -98,7 +105,7 @@ class HomeAdmin extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withOpacity(0.3),
               blurRadius: 6,
               offset: const Offset(2, 4),
             ),

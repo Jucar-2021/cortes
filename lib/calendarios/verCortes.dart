@@ -1,74 +1,37 @@
+import 'package:cortes/administrador/listadoCortes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'datosCorte.dart';
 
-class Captura extends StatelessWidget {
-  final String usuario;
-  final int idUsuario;
-  final String nombre;
-  final String apellidoPaterno;
-  final String apellidoMaterno;
-  const Captura(
-      {super.key,
-      required this.usuario,
-      required this.idUsuario,
-      required this.nombre,
-      required this.apellidoPaterno,
-      required this.apellidoMaterno});
+class ViewCortes extends StatelessWidget {
+  const ViewCortes({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Ingreso(
-        usuario: usuario,
-        idUsuario: idUsuario,
-        nombre: nombre,
-        apellidoPaterno: apellidoPaterno,
-        apellidoMaterno: apellidoMaterno);
+    return const Cortes();
   }
 }
 
-class Ingreso extends StatefulWidget {
-  const Ingreso(
-      {super.key,
-      required this.usuario,
-      required this.idUsuario,
-      required this.nombre,
-      required this.apellidoPaterno,
-      required this.apellidoMaterno});
-  final String usuario;
-  final int idUsuario;
-  final String nombre;
-  final String apellidoPaterno;
-  final String apellidoMaterno;
+class Cortes extends StatefulWidget {
+  const Cortes({super.key});
 
   @override
-  State<Ingreso> createState() => _IngresoState();
+  State<Cortes> createState() => _CortesState();
 }
 
-class _IngresoState extends State<Ingreso> {
+class _CortesState extends State<Cortes> {
   final TextEditingController _fechaSelec = TextEditingController();
   final TextEditingController _fechaVisual = TextEditingController();
   DateTime? _fechaSeleccionada;
-  String? tipoZonaCorte;
 
-  late String user;
-  late int idUsuario;
-  late String nombre;
-  late String apellidoPaterno;
-  late String apellidoMaterno;
   @override
   void initState() {
     super.initState();
-    user = widget.usuario;
-    idUsuario = widget.idUsuario;
-    nombre = widget.nombre;
-    apellidoPaterno = widget.apellidoPaterno;
-    apellidoMaterno = widget.apellidoMaterno;
   }
 
   @override
   void dispose() {
     _fechaSelec.dispose();
+    _fechaVisual.dispose();
     super.dispose();
   }
 
@@ -105,27 +68,13 @@ class _IngresoState extends State<Ingreso> {
       return;
     }
 
-    if (tipoZonaCorte == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Selecciona el tipo de zona: Gasolina o Diésel')),
-      );
-      return;
-    }
-
     final fecha = _fechaSelec.text;
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DatoCorte(
+        builder: (context) => ListadoCortes(
           fecha: fecha,
-          user: user,
-          idUsuario: idUsuario,
-          nombre: nombre,
-          apellidoPaterno: apellidoPaterno,
-          apellidoMaterno: apellidoMaterno,
-          tipoZonaCorte: tipoZonaCorte!,
         ),
       ),
     );
@@ -147,11 +96,11 @@ class _IngresoState extends State<Ingreso> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Fecha de corte",
+              "Fecha",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             Text(
-              "Bienvenido: $nombre $apellidoPaterno $apellidoMaterno",
+              "Bienvenido, selecciona la fecha de cortes a visualizar",
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ],
@@ -193,22 +142,11 @@ class _IngresoState extends State<Ingreso> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Selecciona la fecha del corte",
+                        "Seleccion de fecha",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Elige la fecha que vas a capturar para continuar.",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: cs.onSurface.withOpacity(0.65),
                         ),
                       ),
                     ),
@@ -250,46 +188,6 @@ class _IngresoState extends State<Ingreso> {
                             //de esta forma se identidicara el tipo de corte,
                             const SizedBox(height: 10),
 
-                            Text(
-                              "Tipo de zona de corte",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-
-                            Container(
-                              decoration: BoxDecoration(
-                                color: cs.surface,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: cs.outlineVariant),
-                              ),
-                              child: Column(
-                                children: [
-                                  RadioListTile<String>(
-                                    title: const Text("Gasolina"),
-                                    value: "Gasolina",
-                                    // ignore: deprecated_member_use
-                                    groupValue: tipoZonaCorte,
-                                    // ignore: deprecated_member_use
-                                    onChanged: (value) =>
-                                        setState(() => tipoZonaCorte = value),
-                                  ),
-                                  Divider(height: 1, color: cs.outlineVariant),
-                                  RadioListTile<String>(
-                                    title: const Text("Diésel"),
-                                    value: "Diesel",
-                                    groupValue: tipoZonaCorte,
-                                    // ignore: deprecated_member_use
-                                    onChanged: (value) =>
-                                        setState(() => tipoZonaCorte = value),
-                                  ),
-                                ],
-                              ),
-                            ),
-
                             const SizedBox(height: 14),
                             SizedBox(
                               height: 50,
@@ -311,7 +209,7 @@ class _IngresoState extends State<Ingreso> {
 
                     // Footer discreto
                     Text(
-                      "Consejo: si capturas siempre al cierre, elige la fecha del día.",
+                      "Nota: solo se veran los cortes cerrados.",
                       style: TextStyle(
                         fontSize: 12,
                         // ignore: deprecated_member_use

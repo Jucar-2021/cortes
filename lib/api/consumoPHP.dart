@@ -23,14 +23,25 @@ class ApiService {
       throw Exception('HTTP ${res.statusCode}: ${res.body}');
     }
 
-    final decoded = jsonDecode(res.body);
-    if (decoded is! Map<String, dynamic>) {
-      throw Exception('Respuesta no válida (no es JSON objeto): ${res.body}');
+    final responseBody = res.body.trim();
+
+    if (responseBody.isEmpty) {
+      throw Exception('El servidor devolvió una respuesta vacía.');
     }
 
-    // Si tu backend siempre manda {"ok": true/false}
+    if (responseBody.startsWith('<')) {
+      throw Exception(
+          'El servidor devolvió HTML en lugar de JSON: $responseBody');
+    }
+
+    final decoded = jsonDecode(responseBody);
+
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('Respuesta no válida (no es JSON objeto): $responseBody');
+    }
+
     if (decoded['ok'] != true) {
-      throw Exception(decoded['error'] ?? 'Error API');
+      throw Exception(decoded['error'] ?? decoded['mensaje'] ?? 'Error API');
     }
 
     return decoded;
