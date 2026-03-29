@@ -306,7 +306,7 @@ class _DepositosCajeroPageState extends State<DepositosCajeroPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Efecticard',
+          'Depósitos cajero',
           style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
@@ -323,7 +323,7 @@ class _DepositosCajeroPageState extends State<DepositosCajeroPage> {
                   child: Column(
                     children: [
                       const Text(
-                        'Ingresa los importes de los bauchers.\n'
+                        'Ingresa los importes de los depósitos.\n'
                         'Presiona "Siguiente" para brincar al siguiente campo.',
                         textAlign: TextAlign.center,
                       ),
@@ -404,8 +404,8 @@ class _DepositosCajeroPageState extends State<DepositosCajeroPage> {
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.save),
                           label: Text(_yaExistia
-                              ? 'Actualizar bauchers'
-                              : 'Guardar bauchers'),
+                              ? 'Actualizar depósitos'
+                              : 'Guardar depósitos'),
                           onPressed: _guardando ? null : _guardar,
                         ),
                       ),
@@ -432,7 +432,7 @@ class _DepositosCajeroPageState extends State<DepositosCajeroPage> {
                               CircularProgressIndicator(),
                               SizedBox(width: 14),
                               Text(
-                                'Registrando vouchers...',
+                                'Registrando depósitos...',
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w600),
                               ),
