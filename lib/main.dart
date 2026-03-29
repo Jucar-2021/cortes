@@ -378,9 +378,11 @@ class _CortesState extends State<Cortes> {
               child: const Text('Cancelar'),
             ),
             FilledButton(
-              onPressed: () {
-                final clave = int.tryParse(claveAcceso.text.trim()) ?? 0;
-                Navigator.of(context).pop(clave == 2021);
+              onPressed: () async {
+                final clave = await userApi
+                    .validarAdmin(int.tryParse(claveAcceso.text.trim()) ?? 0);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop(clave != null);
               },
               child: const Text('Aceptar'),
             ),

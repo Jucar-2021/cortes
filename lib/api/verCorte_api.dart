@@ -29,7 +29,6 @@ class VerCorteAPI {
 
     final data = response['data'];
     if (data is List) {
-      print(data);
       return data;
     }
     return [];

@@ -6,7 +6,6 @@ class UserApi {
 
   Future<bool> registrarUsuario(String usuario, String pass, String nombre,
       String apellidoPaterno, String apellidoMaterno) async {
-    print(api.baseUrl + '/User/registrar.php');
     await api.postJson('User/registrar.php', {
       'usuario': usuario,
       'pass': pass,
@@ -23,6 +22,22 @@ class UserApi {
       final res = await api.postJson('User/validar.php', {
         'usuario': usuario,
         'pass': pass,
+      });
+
+      if (res['ok'] == true) {
+        return res;
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> validarAdmin(int clave) async {
+    try {
+      final res = await api.postJson('User/validarAdmin.php', {
+        'clave': clave,
       });
 
       if (res['ok'] == true) {

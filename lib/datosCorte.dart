@@ -323,7 +323,7 @@ class _DatoCorteState extends State<DatoCorte> {
       if (!mounted) return;
       setState(() => _guardando = false);
 
-      Navigator.pop(context);
+      _showCorteGuardadoDialog();
     } catch (e) {
       if (!mounted) return;
       setState(() => _guardando = false);
@@ -436,6 +436,26 @@ class _DatoCorteState extends State<DatoCorte> {
 ''';
 
     await _corteTelegram.sendMessage(mensaje);
+  }
+
+  //Show de confirmacion de corte guardado exitosamente
+  void _showCorteGuardadoDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Corte guardado y enviado a Telegram"),
+        content: const Text("Tu corte ha sido guardado exitosamente."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context, true);
+            },
+            child: const Text("Aceptar"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

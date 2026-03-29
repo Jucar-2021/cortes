@@ -55,46 +55,346 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text("Cortes del día ${fecha}"),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: const Color(0xFF005498),
+        foregroundColor: Colors.white,
+        title: Column(
+          children: [
+            const Text(
+              "Cortes del día",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              fecha,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
       ),
       body: FutureBuilder<List<dynamic>>(
         future: verCorteAPI.obtenerCortes(fecha: fecha),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           } else if (snapshot.hasError) {
             print("Error al obtener cortes: ${snapshot.error}");
-            return Center(child: Text("Error>>>: ${snapshot.error}"));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: Colors.red.shade400,
+                        size: 42,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "Ocurrió un error al obtener los cortes",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "${snapshot.error}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-                child: Text("No se encontraron cortes para esta fecha."));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.receipt_long_rounded,
+                        size: 48,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        "No se encontraron cortes para esta fecha.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
           } else {
             final cortes = snapshot.data!;
-            return ListView.builder(
-              itemCount: cortes.length,
-              itemBuilder: (context, index) {
-                final corte = cortes[index];
-                return Card(
-                  child: ListTile(
-                    title: Text("${corte['usuario']}"),
-                    subtitle: Text(
-                        "Producto: ${corte['producto']} - Efectivo Entregado: \$${corte['efectivoEntregado']}"),
-                    onTap: () async {
-                      final consumoClientes = await _consumoClientes(
-                        idUsuario: corte['idUsuario'].toString(),
-                        fecha: fecha,
-                        producto: corte['producto'].toString(),
-                      );
 
-                      _showCorteDetails(context, corte, consumoClientes);
+            return Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF005498),
+                        Color(0xFF1976D2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.18),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.calendar_month_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Resumen del día",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Se encontraron ${cortes.length} corte(s)",
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                    itemCount: cortes.length,
+                    itemBuilder: (context, index) {
+                      final corte = cortes[index];
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 14),
+                        child: Material(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          elevation: 2,
+                          shadowColor: Colors.black.withOpacity(0.08),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(18),
+                            onTap: () async {
+                              final consumoClientes = await _consumoClientes(
+                                idUsuario: corte['idUsuario'].toString(),
+                                fecha: fecha,
+                                producto: corte['producto'].toString(),
+                              );
+
+                              _showCorteDetails(
+                                  context, corte, consumoClientes);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF005498)
+                                              .withOpacity(0.10),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: const Icon(
+                                          Icons.person_rounded,
+                                          color: Color(0xFF005498),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          "${corte['usuario']}",
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 18,
+                                        color: Colors.grey,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    children: [
+                                      _buildInfoChip(
+                                        icon: Icons.local_gas_station_rounded,
+                                        label: "Producto",
+                                        value: "${corte['producto']}",
+                                        color: Colors.green,
+                                      ),
+                                      _buildInfoChip(
+                                        icon: Icons.payments_rounded,
+                                        label: "Efectivo",
+                                        value:
+                                            "\$${corte['efectivoEntregado']}",
+                                        color: Colors.orange,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8FAFC),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                          color: Colors.grey.shade200),
+                                    ),
+                                    child: const Text(
+                                      "Toca para ver el detalle completo del corte",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildInfoChip({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.20)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -118,44 +418,381 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
     }
   }
 
-  void _showCorteDetails(BuildContext context, Map<String, dynamic> corte,
-      List<dynamic> consumoClientes) {
+  void _showCorteDetails(
+    BuildContext context,
+    Map<String, dynamic> corte,
+    List<dynamic> consumoClientes,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Corte - ${corte['usuario']}",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Producto: ${corte['producto']}\n",
-                style: TextStyle(
+      builder: (context) {
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            width: double.maxFinite,
+            constraints: const BoxConstraints(maxHeight: 700),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Encabezado
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.receipt_long_rounded,
+                        color: Colors.redAccent,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "Corte - ${corte['usuario']}",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Producto
+                        _buildHighlightCard(
+                          title: "Producto",
+                          value: "${corte['producto']}",
+                          icon: Icons.local_gas_station_rounded,
+                          color: const Color(0xFF0B7A00),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // Venta principal
+                        _buildHighlightCard(
+                          title: "Venta total",
+                          value: _fmt(_parseToDouble(corte['venta'])),
+                          icon: Icons.attach_money_rounded,
+                          color: const Color(0xFF005498),
+                          bigValue: true,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        _buildSectionCard(
+                          title: "Tarjetas y clientes",
+                          icon: Icons.credit_card_rounded,
+                          children: [
+                            _buildDetailRow(
+                              "Santander",
+                              _fmt(_parseToDouble(corte['santander'])),
+                            ),
+                            _buildDetailRow(
+                              "Mifel",
+                              _fmt(_parseToDouble(corte['mifel'])),
+                            ),
+                            _buildDetailRow(
+                              "Monedero",
+                              _fmt(_parseToDouble(corte['efecticar'])),
+                            ),
+                            _buildDetailRow(
+                              "Clientes",
+                              _fmt(_parseToDouble(corte['clientes'])),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        _buildSectionCard(
+                          title: "Depósitos y gastos",
+                          icon: Icons.account_balance_wallet_rounded,
+                          children: [
+                            _buildDetailRow(
+                              "Global",
+                              _fmt(_parseToDouble(corte['depositos'])),
+                            ),
+                            _buildDetailRow(
+                              "Buzón",
+                              _fmt(_parseToDouble(corte['buzon'])),
+                            ),
+                            _buildDetailRow(
+                              "Gastos",
+                              _fmt(_parseToDouble(corte['gastos'])),
+                              valueColor: Colors.redAccent,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        _buildSectionCard(
+                          title: "Efectivo y póliza",
+                          icon: Icons.payments_rounded,
+                          children: [
+                            _buildDetailRow(
+                              "Efectivo entregado",
+                              _fmt(_parseToDouble(corte['efectivoEntregado'])),
+                              valueColor: const Color(0xFF005498),
+                              bold: true,
+                            ),
+                            _buildDetailRow(
+                              "Cuadre póliza",
+                              _fmt(_parseToDouble(corte['totalEfectivo'])),
+                              valueColor: const Color(0xFFDD7200),
+                              bold: true,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        _buildSectionCard(
+                          title: "Detalle de clientes",
+                          icon: Icons.groups_rounded,
+                          children: consumoClientes.isNotEmpty
+                              ? consumoClientes.map((cliente) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: Colors.grey.shade200),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(
+                                          Icons.person_rounded,
+                                          size: 20,
+                                          color: Colors.blueGrey,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            "${cliente['razonSocial']}",
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          _fmt(_parseToDouble(
+                                              cliente['importe'])),
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF005498),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList()
+                              : [
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Text(
+                                      "Sin consumo de clientes",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.check_circle_outline_rounded),
+                    label: const Text("Cerrar"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHighlightCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    bool bigValue = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.10),
+            color.withOpacity(0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: bigValue ? 24 : 18,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: const Color.fromARGB(255, 0, 27, 180)),
-              ),
-              Text("Venta: ${_fmt(_parseToDouble(corte['venta']))}\n",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: const Color(0xFF005498)),
+              const SizedBox(width: 8),
               Text(
-                  "Santander: ${_fmt(_parseToDouble(corte['santander']))}\nMifel: ${_fmt(_parseToDouble(corte['mifel']))}\nMonedero: ${_fmt(_parseToDouble(corte['efecticar']))}\n",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Text("Consumo de Clientes:"),
-              if (consumoClientes.isNotEmpty)
-                ...consumoClientes.map((cliente) => Text(
-                    "- ${cliente['razonSocial']} - ${_fmt(_parseToDouble(cliente['importe']))} \n"))
-              else
-                const Text("Sin consumo de clientes"),
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF005498),
+                ),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cerrar"),
+          const SizedBox(height: 14),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    Color valueColor = Colors.black87,
+    bool bold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey.shade800,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              color: valueColor,
+              fontWeight: bold ? FontWeight.bold : FontWeight.w600,
+            ),
           ),
         ],
       ),
