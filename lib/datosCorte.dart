@@ -432,7 +432,7 @@ class _DatoCorteState extends State<DatoCorte> {
 💰 <b>Monedas: ${_fmt(double.tryParse(_monedasController.text) ?? 0)}</b>
 ━━━━━━━━━━━━━━━━━━
 🟢 <b>TOTAL EFECTIVO:</b>
-💰 <b>${_fmt((_totalCajero) + (double.tryParse(_buzonController.text) ?? 0) + totalFinal + (double.tryParse(_billetesController.text) ?? 0) + (double.tryParse(_monedasController.text) ?? 0))}</b>
+💰 <b>${_fmt((double.tryParse(_ventaController.text) ?? 0) - _totalSantander - _totalMifel - _totalEfecticar - _totalClientes - (double.tryParse(_gastosController.text) ?? 0))}</b>
 ''';
 
     await _corteTelegram.sendMessage(mensaje);
@@ -498,6 +498,7 @@ class _DatoCorteState extends State<DatoCorte> {
                   ),
                   onChanged: (value) async {
                     await _saveString('ventaDia', value);
+
                     _recalcularTotal();
                   },
                 ),

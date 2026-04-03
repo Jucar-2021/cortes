@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  final String baseUrl = 'https://dev-soluciones.com/api';
+  final String baseUrl = 'http://192.168.1.39/api';
 
   Uri _uri(String endpoint) => Uri.parse('$baseUrl/$endpoint');
 
