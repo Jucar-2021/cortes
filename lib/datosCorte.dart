@@ -273,6 +273,9 @@ class _DatoCorteState extends State<DatoCorte> {
 
   // ======== BOTÓN GUARDAR ========
   Future<void> _onGuardarPressed() async {
+    final confirmacion = await _showConfirmacionGuardarDialog();
+    if (!confirmacion) return;
+
     if (_guardando) return;
 
     final venta = double.tryParse(_ventaController.text) ?? 0;
@@ -455,6 +458,30 @@ class _DatoCorteState extends State<DatoCorte> {
         ],
       ),
     );
+  }
+
+  //show para confirmacion final para guardar corte
+  Future<bool> _showConfirmacionGuardarDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Confirmar guardado",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            content: const Text(
+                "¿Estás seguro de que deseas guardar este corte?\n\nAsegúrate de que toda la información sea correcta."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancelar"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text("Guardar"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   @override
