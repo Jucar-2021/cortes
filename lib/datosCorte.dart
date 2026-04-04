@@ -468,7 +468,8 @@ class _DatoCorteState extends State<DatoCorte> {
             title: const Text("Confirmar guardado",
                 style: TextStyle(fontWeight: FontWeight.bold)),
             content: const Text(
-                "¿Estás seguro de que deseas guardar este corte?\n\nAsegúrate de que toda la información sea correcta."),
+                "¿Estás seguro de que deseas guardar este corte?\n\nAsegúrate de que toda la información sea correcta.",
+                style: TextStyle(fontWeight: FontWeight.w400)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
