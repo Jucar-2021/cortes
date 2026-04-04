@@ -404,7 +404,7 @@ class _DatoCorteState extends State<DatoCorte> {
   // ======== ENVIAR A TELEGRAM ========
   Future<void> _enviarCorteTelegram() async {
     final mensaje = '''
-<b>⛽ CORTE DE TURNO</b>
+<b>⛽ CORTE DESPACHADOR</b>
 👤 <b>$nombre $apellidoPaterno $apellidoMaterno</b>
 
 ━━━━━━━━━━━━━━━━━━
