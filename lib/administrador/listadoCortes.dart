@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/verCorte_api.dart';
+import '../api/cortes/verCorte_api.dart';
 import '../doc_tar_depCaj/cajero.dart';
 import '../doc_tar_depCaj/efecticard.dart';
 import '../doc_tar_depCaj/mifel.dart';
