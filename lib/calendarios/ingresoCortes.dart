@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../api/consumoPHP.dart';
 import '../datosCorte.dart';
+import '../api/cortes/validacion_api.dart';
 
 class Captura extends StatelessWidget {
   final String usuario;
@@ -56,6 +58,10 @@ class _IngresoState extends State<Ingreso> {
   late String nombre;
   late String apellidoPaterno;
   late String apellidoMaterno;
+
+  late final ApiService apiService;
+  late ValidacionCorteApi validacionCorteApi;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +70,9 @@ class _IngresoState extends State<Ingreso> {
     nombre = widget.nombre;
     apellidoPaterno = widget.apellidoPaterno;
     apellidoMaterno = widget.apellidoMaterno;
+
+    apiService = ApiService();
+    validacionCorteApi = ValidacionCorteApi(apiService);
   }
 
   @override
@@ -97,7 +106,7 @@ class _IngresoState extends State<Ingreso> {
     }
   }
 
-  void _continuar() {
+  Future<void> _continuar() async {
     if (_fechaSeleccionada == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Selecciona una fecha primero')),
@@ -112,23 +121,87 @@ class _IngresoState extends State<Ingreso> {
       );
       return;
     }
-
     final fecha = _fechaSelec.text;
+    if (!_validarFechaSeleccionada()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('La fecha seleccionada no es válida')),
+      );
+      return;
+    }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DatoCorte(
-          fecha: fecha,
-          user: user,
-          idUsuario: idUsuario,
-          nombre: nombre,
-          apellidoPaterno: apellidoPaterno,
-          apellidoMaterno: apellidoMaterno,
-          tipoZonaCorte: tipoZonaCorte!,
+    final idCorte = await _validarCorte(fecha, idUsuario, tipoZonaCorte!);
+
+    if (idCorte != null) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                icon: const Icon(Icons.warning, color: Colors.orange, size: 48),
+                title: const Text('Corte ya registrado',
+                    style: TextStyle(fontWeight: FontWeight.w700)),
+                content: Text(
+                  'Ya tienes un corte registrado\n$nombre \npara la fecha $fecha',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancelar',
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await validacionCorteApi.eliminarCorte(idCorte);
+                      Navigator.pop(context); // Cierra el diálogo
+                      _continuar(); // Intenta continuar de nuevo
+                    },
+                    child: const Text('Aceptar y continuar',
+                        style: TextStyle(color: Colors.green)),
+                  ),
+                ],
+              ));
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DatoCorte(
+            fecha: fecha,
+            user: user,
+            idUsuario: idUsuario,
+            nombre: nombre,
+            apellidoPaterno: apellidoPaterno,
+            apellidoMaterno: apellidoMaterno,
+            tipoZonaCorte: tipoZonaCorte!,
+          ),
         ),
-      ),
-    );
+      );
+    }
+  }
+
+  Future<int?> _validarCorte(
+      String fecha, int idUsuario, String producto) async {
+    try {
+      final idCorte = await validacionCorteApi.validarCorteRegistrado(
+        idUsuario: idUsuario,
+        fecha: fecha,
+        producto: producto,
+      );
+      return idCorte;
+    } catch (e) {
+      print('Error al validar corte met en fecha: $e');
+      return null;
+    }
+  }
+
+  // Aqui se obtine la fecha del dispositivo para comparacion de la fecha seleccionada,
+  // esto es para evitar que se capture una fecha futura o muy antigua.
+  bool _validarFechaSeleccionada() {
+    final hoy = DateTime.now();
+    final fechaLimiteInferior = DateTime(hoy.year, hoy.month, hoy.day - 2);
+    final fechaLimiteSuperior = DateTime(hoy.year, hoy.month, hoy.day + 2);
+
+    return _fechaSeleccionada!.isAfter(fechaLimiteInferior) &&
+        _fechaSeleccionada!.isBefore(fechaLimiteSuperior);
   }
 
   @override

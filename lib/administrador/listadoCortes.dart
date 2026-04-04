@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
 import '../api/verCorte_api.dart';
+import '../doc_tar_depCaj/cajero.dart';
+import '../doc_tar_depCaj/efecticard.dart';
+import '../doc_tar_depCaj/mifel.dart';
+import '../doc_tar_depCaj/santander.dart';
+import '../clientes/listadoClientes.dart';
 
 class ListadoCortes extends StatelessWidget {
   final String fecha;
@@ -33,12 +38,16 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
   void initState() {
     super.initState();
     fecha = widget.fecha;
+    setState(() {
+      verCorteAPI.obtenerCortes(fecha: fecha);
+    });
   }
 
-  Future<List<dynamic>> _consumoClientes(
-      {required String idUsuario,
-      required String fecha,
-      required String producto}) async {
+  Future<List<dynamic>> _consumoClientes({
+    required String idUsuario,
+    required String fecha,
+    required String producto,
+  }) async {
     try {
       final data = await consumoClientesAPI.consumoClientes(
         idUsuario: idUsuario,
@@ -52,34 +61,116 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
     }
   }
 
+  void _onEditarConcepto(
+    BuildContext context, {
+    required Map<String, dynamic> corte,
+    required String concepto,
+  }) {
+    Navigator.pop(context);
+
+    switch (concepto) {
+      case "Santander":
+        Navigator.push(
+            this.context,
+            MaterialPageRoute(
+              builder: (_) => SantanderBauchersPage(
+                user: corte['usuario'].toString(),
+                idUsuario: corte['idUsuario'],
+                fecha: corte['fecha'].toString(),
+                producto: corte['producto'].toString(),
+              ),
+            ));
+        break;
+      case "Mifel":
+        Navigator.push(
+            this.context,
+            MaterialPageRoute(
+              builder: (_) => MifelBauchersPage(
+                user: corte['usuario'].toString(),
+                idUsuario: corte['idUsuario'],
+                fecha: corte['fecha'].toString(),
+                producto: corte['producto'].toString(),
+              ),
+            ));
+        break;
+      case "Monedero":
+        Navigator.push(
+            this.context,
+            MaterialPageRoute(
+              builder: (_) => EfecticarBauchersPage(
+                user: corte['usuario'].toString(),
+                idUsuario: corte['idUsuario'],
+                fecha: corte['fecha'].toString(),
+                producto: corte['producto'].toString(),
+              ),
+            ));
+        break;
+      case "Clientes":
+        Navigator.push(
+            this.context,
+            MaterialPageRoute(
+              builder: (_) => Listadoclientes(
+                user: corte['usuario'].toString(),
+                idUsuario: corte['idUsuario'],
+                fecha: corte['fecha'].toString(),
+                producto: corte['producto'].toString(),
+              ),
+            ));
+        break;
+      case "Global":
+        Navigator.push(
+            this.context,
+            MaterialPageRoute(
+              builder: (_) => DepositosCajeroPage(
+                user: corte['usuario'].toString(),
+                idUsuario: corte['idUsuario'],
+                fecha: corte['fecha'].toString(),
+                producto: corte['producto'].toString(),
+              ),
+            ));
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: const Color(0xFF005498),
-        foregroundColor: Colors.white,
-        title: Column(
-          children: [
-            const Text(
-              "Cortes del día",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: const Color(0xFF005498),
+          foregroundColor: Colors.white,
+          title: Column(
+            children: [
+              const Text(
+                "Cortes del día",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              fecha,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
+              Text(
+                fecha,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    verCorteAPI.obtenerCortes(fecha: fecha);
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Refrescando cortes...')),
+                  );
+                },
+                icon: Icon(Icons.refresh))
+          ]),
       body: FutureBuilder<List<dynamic>>(
         future: verCorteAPI.obtenerCortes(fecha: fecha),
         builder: (context, snapshot) {
@@ -256,7 +347,10 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                               );
 
                               _showCorteDetails(
-                                  context, corte, consumoClientes);
+                                context,
+                                Map<String, dynamic>.from(corte),
+                                consumoClientes,
+                              );
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(16),
@@ -327,7 +421,8 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                                       color: const Color(0xFFF8FAFC),
                                       borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
-                                          color: Colors.grey.shade200),
+                                        color: Colors.grey.shade200,
+                                      ),
                                     ),
                                     child: const Text(
                                       "Toca para ver el detalle completo del corte",
@@ -399,13 +494,11 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
     );
   }
 
-  // ======== FORMATO DINERO ========
   final NumberFormat _currencyFormat =
       NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
 
   String _fmt(double valor) => _currencyFormat.format(valor);
 
-  // Método auxiliar para convertir valores a double de forma segura
   double _parseToDouble(dynamic value) {
     if (value is int) {
       return value.toDouble();
@@ -425,7 +518,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
   ) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Dialog(
           insetPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -439,7 +532,6 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Encabezado
                 Row(
                   children: [
                     Container(
@@ -466,29 +558,23 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(dialogContext),
                       icon: const Icon(Icons.close_rounded),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        // Producto
                         _buildHighlightCard(
                           title: "Producto",
                           value: "${corte['producto']}",
                           icon: Icons.local_gas_station_rounded,
                           color: const Color(0xFF0B7A00),
                         ),
-
                         const SizedBox(height: 14),
-
-                        // Venta principal
                         _buildHighlightCard(
                           title: "Venta total",
                           value: _fmt(_parseToDouble(corte['venta'])),
@@ -496,9 +582,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                           color: const Color(0xFF005498),
                           bigValue: true,
                         ),
-
                         const SizedBox(height: 16),
-
                         _buildSectionCard(
                           title: "Tarjetas y clientes",
                           icon: Icons.credit_card_rounded,
@@ -506,24 +590,46 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                             _buildDetailRow(
                               "Santander",
                               _fmt(_parseToDouble(corte['santander'])),
+                              showEditButton: true,
+                              onEdit: () => _onEditarConcepto(
+                                dialogContext,
+                                corte: corte,
+                                concepto: "Santander",
+                              ),
                             ),
                             _buildDetailRow(
                               "Mifel",
                               _fmt(_parseToDouble(corte['mifel'])),
+                              showEditButton: true,
+                              onEdit: () => _onEditarConcepto(
+                                dialogContext,
+                                corte: corte,
+                                concepto: "Mifel",
+                              ),
                             ),
                             _buildDetailRow(
                               "Monedero",
                               _fmt(_parseToDouble(corte['efecticar'])),
+                              showEditButton: true,
+                              onEdit: () => _onEditarConcepto(
+                                dialogContext,
+                                corte: corte,
+                                concepto: "Monedero",
+                              ),
                             ),
                             _buildDetailRow(
                               "Clientes",
                               _fmt(_parseToDouble(corte['clientes'])),
+                              showEditButton: true,
+                              onEdit: () => _onEditarConcepto(
+                                dialogContext,
+                                corte: corte,
+                                concepto: "Clientes",
+                              ),
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildSectionCard(
                           title: "Depósitos y gastos",
                           icon: Icons.account_balance_wallet_rounded,
@@ -531,6 +637,12 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                             _buildDetailRow(
                               "Global",
                               _fmt(_parseToDouble(corte['depositos'])),
+                              showEditButton: true,
+                              onEdit: () => _onEditarConcepto(
+                                dialogContext,
+                                corte: corte,
+                                concepto: "Global",
+                              ),
                             ),
                             _buildDetailRow(
                               "Buzón",
@@ -543,9 +655,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildSectionCard(
                           title: "Efectivo y póliza",
                           icon: Icons.payments_rounded,
@@ -564,9 +674,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildSectionCard(
                           title: "Detalle de clientes",
                           icon: Icons.groups_rounded,
@@ -579,7 +687,8 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                                       color: Colors.grey.shade50,
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                          color: Colors.grey.shade200),
+                                        color: Colors.grey.shade200,
+                                      ),
                                     ),
                                     child: Row(
                                       crossAxisAlignment:
@@ -603,7 +712,8 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                                         const SizedBox(width: 10),
                                         Text(
                                           _fmt(_parseToDouble(
-                                              cliente['importe'])),
+                                            cliente['importe'],
+                                          )),
                                           style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
@@ -636,13 +746,11 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.pop(dialogContext),
                     icon: const Icon(Icons.check_circle_outline_rounded),
                     label: const Text("Cerrar"),
                     style: ElevatedButton.styleFrom(
@@ -770,6 +878,8 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
     String value, {
     Color valueColor = Colors.black87,
     bool bold = false,
+    bool showEditButton = false,
+    VoidCallback? onEdit,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -794,6 +904,21 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
               fontWeight: bold ? FontWeight.bold : FontWeight.w600,
             ),
           ),
+          if (showEditButton) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: 'Editar $label',
+              onPressed: onEdit,
+              icon: const Icon(
+                Icons.edit_rounded,
+                size: 20,
+                color: Color(0xFF005498),
+              ),
+              splashRadius: 20,
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+            ),
+          ],
         ],
       ),
     );

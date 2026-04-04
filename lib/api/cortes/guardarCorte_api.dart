@@ -1,4 +1,4 @@
-import 'consumoPHP.dart';
+import '../consumoPHP.dart';
 
 class CorteApi {
   final ApiService api;
@@ -17,7 +17,6 @@ class CorteApi {
     required double buzon,
     required double gastos,
     required double clientes,
-    required double efectivoEntregado,
   }) async {
     await api.postJson('Cortes/registrar.php', {
       'fecha': fecha,
@@ -31,7 +30,6 @@ class CorteApi {
       'buzon': buzon,
       'gastos': gastos,
       'clientes': clientes,
-      'efectivoEntregado': efectivoEntregado,
       'producto': producto,
     });
   }

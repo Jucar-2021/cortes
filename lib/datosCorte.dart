@@ -6,7 +6,7 @@ import 'doc_tar_depCaj/efecticard.dart';
 import 'clientes/listadoClientes.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api/guardarCorte_api.dart';
+import 'api/cortes/guardarCorte_api.dart';
 import 'api/telegramSend_api.dart';
 import 'api/consumoPHP.dart';
 
@@ -395,7 +395,6 @@ class _DatoCorteState extends State<DatoCorte> {
       buzon: buzon,
       gastos: gastos,
       clientes: clientes,
-      efectivoEntregado: total,
     );
   }
 
