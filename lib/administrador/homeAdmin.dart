@@ -1,7 +1,7 @@
 import 'package:cortes/administrador/adminUser/registroUser.dart';
 import 'package:flutter/material.dart';
-
-import '../calendarios/verCortes.dart';
+import '../calendarios/cal_reportesTarjetas.dart';
+import '../calendarios/cal_verCortes.dart';
 
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
@@ -65,10 +65,15 @@ class HomeAdmin extends StatelessWidget {
             _adminButton(
               context,
               icon: Icons.delete_forever,
-              label: "Reiniciar Sistema",
+              label: "Reportes de Tarjetas",
               color: Colors.red,
               onTap: () {
-                // futura función
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CalReporteTarjetas(),
+                  ),
+                );
               },
             ),
 

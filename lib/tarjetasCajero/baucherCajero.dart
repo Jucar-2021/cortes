@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/documentos/global_api.dart';
+import '../api/documentos/registro_api.dart';
 
 class _CajeroItem {
   final int? idCajero; // null = aún no existe en BD

@@ -2,7 +2,7 @@ import 'package:cortes/administrador/homeAdmin.dart';
 import 'package:cortes/api/consumoPHP.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'calendarios/ingresoCortes.dart';
+import 'calendarios/cal_ingresoCortes.dart';
 import 'api/user/user_api.dart';
 
 Future<void> main() async {
