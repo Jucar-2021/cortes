@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../api/consumoPHP.dart';
-import '../api/cortes/verCorte_api.dart';
-import '../doc_tar_depCaj/cajero.dart';
-import '../doc_tar_depCaj/efecticard.dart';
-import '../doc_tar_depCaj/mifel.dart';
-import '../doc_tar_depCaj/santander.dart';
-import '../clientes/listadoClientes.dart';
+import '../../api/consumoPHP.dart';
+import '../../api/cortes/verCorte_api.dart';
+import '../../api/cortes/manejoCortes_api.dart';
+import '../../tarjetasCajero/baucherCajero.dart';
+import '../../clientes/listadoClientes.dart';
 
 class ListadoCortes extends StatelessWidget {
   final String fecha;
@@ -33,6 +31,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
   final ApiService apiService = ApiService();
   late final VerCorteAPI verCorteAPI = VerCorteAPI(apiService);
   late final VerCorteAPI consumoClientesAPI = VerCorteAPI(apiService);
+  late final ManejocortesApi manejoCortesAPI = ManejocortesApi(apiService);
 
   @override
   void initState() {
@@ -73,11 +72,12 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
         Navigator.push(
             this.context,
             MaterialPageRoute(
-              builder: (_) => SantanderBauchersPage(
+              builder: (_) => RegistroDocumentosPage(
                 user: corte['usuario'].toString(),
                 idUsuario: corte['idUsuario'],
                 fecha: corte['fecha'].toString(),
                 producto: corte['producto'].toString(),
+                banco: 'Santander',
               ),
             ));
         break;
@@ -85,11 +85,12 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
         Navigator.push(
             this.context,
             MaterialPageRoute(
-              builder: (_) => MifelBauchersPage(
+              builder: (_) => RegistroDocumentosPage(
                 user: corte['usuario'].toString(),
                 idUsuario: corte['idUsuario'],
                 fecha: corte['fecha'].toString(),
                 producto: corte['producto'].toString(),
+                banco: 'Mifel',
               ),
             ));
         break;
@@ -97,11 +98,12 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
         Navigator.push(
             this.context,
             MaterialPageRoute(
-              builder: (_) => EfecticarBauchersPage(
+              builder: (_) => RegistroDocumentosPage(
                 user: corte['usuario'].toString(),
                 idUsuario: corte['idUsuario'],
                 fecha: corte['fecha'].toString(),
                 producto: corte['producto'].toString(),
+                banco: 'Monedero',
               ),
             ));
         break;
@@ -121,11 +123,12 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
         Navigator.push(
             this.context,
             MaterialPageRoute(
-              builder: (_) => DepositosCajeroPage(
+              builder: (_) => RegistroDocumentosPage(
                 user: corte['usuario'].toString(),
                 idUsuario: corte['idUsuario'],
                 fecha: corte['fecha'].toString(),
                 producto: corte['producto'].toString(),
+                banco: 'Cajero',
               ),
             ));
         break;
@@ -403,7 +406,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                                       ),
                                       _buildInfoChip(
                                         icon: Icons.payments_rounded,
-                                        label: "Efectivo",
+                                        label: "Efectivo entregado",
                                         value:
                                             "\$${corte['efectivoEntregado']}",
                                         color: Colors.orange,
@@ -609,7 +612,7 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                             ),
                             _buildDetailRow(
                               "Monedero",
-                              _fmt(_parseToDouble(corte['efecticar'])),
+                              _fmt(_parseToDouble(corte['monedero'])),
                               showEditButton: true,
                               onEdit: () => _onEditarConcepto(
                                 dialogContext,
@@ -657,17 +660,11 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                         ),
                         const SizedBox(height: 14),
                         _buildSectionCard(
-                          title: "Efectivo y póliza",
+                          title: "Cuadre de efectivo",
                           icon: Icons.payments_rounded,
                           children: [
                             _buildDetailRow(
-                              "Efectivo entregado",
-                              _fmt(_parseToDouble(corte['efectivoEntregado'])),
-                              valueColor: const Color(0xFF005498),
-                              bold: true,
-                            ),
-                            _buildDetailRow(
-                              "Cuadre póliza",
+                              "Cuadre liquidación",
                               _fmt(_parseToDouble(corte['totalEfectivo'])),
                               valueColor: const Color(0xFFDD7200),
                               bold: true,
@@ -747,6 +744,72 @@ class _VisualizarCorteState extends State<VisualizarCorte> {
                   ),
                 ),
                 const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: dialogContext,
+                        builder: (confirmContext) {
+                          return AlertDialog(
+                            title: const Text("Confirmar eliminación"),
+                            content:
+                                const Text("Esta acción no se puede deshacer."),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(confirmContext, false),
+                                child: const Text("Cancelar"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () =>
+                                    Navigator.pop(confirmContext, true),
+                                child: const Text("Eliminar"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (confirm == true) {
+                        try {
+                          await manejoCortesAPI.eliminarCorte(
+                            corte['idCorte'],
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Corte eliminado exitosamente'),
+                            ),
+                          );
+                          Navigator.pop(dialogContext);
+                          setState(() {
+                            verCorteAPI.obtenerCortes(fecha: fecha);
+                          });
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error al eliminar el corte: $e'),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.delete_outline_rounded),
+                    label: const Text("Eliminar corte"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: const BorderSide(color: Colors.redAccent),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(

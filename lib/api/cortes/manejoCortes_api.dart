@@ -1,8 +1,8 @@
 import '../consumoPHP.dart';
 
-class ValidacionCorteApi {
+class ManejocortesApi {
   final ApiService api;
-  ValidacionCorteApi(this.api);
+  ManejocortesApi(this.api);
 
 //valida si existe un corte registrado me diante el idUsuario y fecha,
 //si existe devuelve el idCorte del corte registrado, si no existe la bd devuelve false.

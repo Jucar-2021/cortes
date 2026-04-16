@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'doc_tar_depCaj/cajero.dart' show DepositosCajeroPage;
-import 'doc_tar_depCaj/santander.dart';
-import 'doc_tar_depCaj/mifel.dart';
-import 'doc_tar_depCaj/efecticard.dart';
+//import 'tarjetasCajero/cajero.dart';
+import 'tarjetasCajero/baucherCajero.dart';
+//import 'tarjetasCajero/santander.dart';
+//import 'tarjetasCajero/mifel.dart';
+//import 'tarjetasCajero/monedero.dart';
 import 'clientes/listadoClientes.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,7 +54,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
   double _totalSantander = 0;
   double _totalMifel = 0;
-  double _totalEfecticar = 0;
+  double _totalMonedero = 0;
   double _totalClientes = 0;
   double _totalCajero = 0;
   double totalFinal = 0;
@@ -100,7 +101,7 @@ class _DatoCorteState extends State<DatoCorte> {
     // Cargar totales
     _totalSantander = _prefs!.getDouble(_k('totalSantander')) ?? 0.0;
     _totalMifel = _prefs!.getDouble(_k('totalMifel')) ?? 0.0;
-    _totalEfecticar = _prefs!.getDouble(_k('totalEfecticar')) ?? 0.0;
+    _totalMonedero = _prefs!.getDouble(_k('totalMonedero')) ?? 0.0;
     _totalCajero = _prefs!.getDouble(_k('totalCajero')) ?? 0.0;
     _totalClientes = _prefs!.getDouble(_k('totalClientes')) ?? 0.0;
 
@@ -134,7 +135,7 @@ class _DatoCorteState extends State<DatoCorte> {
       totalFinal = venta -
           _totalSantander -
           _totalMifel -
-          _totalEfecticar -
+          _totalMonedero -
           _totalClientes -
           _totalCajero -
           buz -
@@ -164,14 +165,14 @@ class _DatoCorteState extends State<DatoCorte> {
     await _prefs!.remove(_k('ajustedep'));
     await _prefs!.remove(_k('totalSantander'));
     await _prefs!.remove(_k('totalMifel'));
-    await _prefs!.remove(_k('totalEfecticar'));
+    await _prefs!.remove(_k('totalMonedero'));
     await _prefs!.remove(_k('totalClientes'));
     await _prefs!.remove(_k('billetes'));
     await _prefs!.remove(_k('monedas'));
   }
 
   // ======== NAVEGAR A PANTALLAS DE BAUCHERS ========
-  Future<void> _editarSantander() async {
+/*   Future<void> _editarSantander() async {
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
@@ -211,7 +212,7 @@ class _DatoCorteState extends State<DatoCorte> {
     }
   }
 
-  Future<void> _editarEfecticar() async {
+  Future<void> _editarMonedero() async {
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
@@ -225,29 +226,47 @@ class _DatoCorteState extends State<DatoCorte> {
     );
 
     if (resultado != null) {
-      setState(() => _totalEfecticar = resultado);
-      await _saveDouble('totalEfecticar', resultado);
+      setState(() => _totalMonedero = resultado);
+      await _saveDouble('totalMonedero', resultado);
       _recalcularTotal();
     }
-  }
-
-  Future<void> _editarDepositosCajero() async {
+  } */
+  // Metodo genérico para navegar a cualquier baucher (Cajero, Santander, Mifel, Monedero)
+  Future<void> _editarDocumentos(String banco) async {
     final resultado = await Navigator.push<double>(
       context,
       MaterialPageRoute(
-        builder: (_) => DepositosCajeroPage(
-          fecha: fecha,
-          user: user,
-          idUsuario: widget.idUsuario,
-          producto: producto,
-        ),
+        builder: (_) => RegistroDocumentosPage(
+            fecha: fecha,
+            user: user,
+            idUsuario: widget.idUsuario,
+            producto: producto,
+            banco: banco),
       ),
     );
 
     if (resultado != null) {
-      setState(() => _totalCajero = resultado);
-      await _saveDouble('totalCajero', resultado);
-      _recalcularTotal();
+      switch (banco) {
+        case 'Santander':
+          setState(() => _totalSantander = resultado);
+          await _saveDouble('totalSantander', resultado);
+          _recalcularTotal();
+          break;
+        case 'Mifel':
+          setState(() => _totalMifel = resultado);
+          await _saveDouble('totalMifel', resultado);
+          _recalcularTotal();
+          break;
+        case 'Monedero':
+          setState(() => _totalMonedero = resultado);
+          await _saveDouble('totalMonedero', resultado);
+          _recalcularTotal();
+          break;
+        case 'Cajero':
+          setState(() => _totalCajero = resultado);
+          await _saveDouble('totalCajero', resultado);
+          _recalcularTotal();
+      }
     }
   }
 
@@ -287,7 +306,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
     final santander = _totalSantander;
     final mifel = _totalMifel;
-    final efecticar = _totalEfecticar;
+    final monedero = _totalMonedero;
     final clientes = _totalClientes;
 
     final total = totalFinal + billetes + monedas;
@@ -310,7 +329,7 @@ class _DatoCorteState extends State<DatoCorte> {
         venta,
         santander,
         mifel,
-        efecticar,
+        monedero,
         depositos,
         buzon,
         gastos,
@@ -376,7 +395,7 @@ class _DatoCorteState extends State<DatoCorte> {
     double venta,
     double santander,
     double mifel,
-    double efecticar,
+    double monedero,
     double depositos,
     double buzon,
     double gastos,
@@ -393,11 +412,12 @@ class _DatoCorteState extends State<DatoCorte> {
       venta: venta,
       santander: santander,
       mifel: mifel,
-      efecticar: efecticar,
+      monedero: monedero,
       depositos: depositos,
       buzon: buzon,
       gastos: gastos,
       clientes: clientes,
+      efectivoEntregado: total,
     );
   }
 
@@ -417,7 +437,7 @@ class _DatoCorteState extends State<DatoCorte> {
 
 🏦 <b>Mifel:</b> ${_fmt(_totalMifel)}
 
-💳 <b>Efecticar:</b> ${_fmt(_totalEfecticar)}
+💳 <b>Efecticard:</b> ${_fmt(_totalMonedero)}
 
 👥 <b>Total clientes:</b> ${_fmt(_totalClientes)}
 
@@ -434,7 +454,7 @@ class _DatoCorteState extends State<DatoCorte> {
 💰 <b>Monedas: ${_fmt(double.tryParse(_monedasController.text) ?? 0)}</b>
 ━━━━━━━━━━━━━━━━━━
 🟢 <b>TOTAL EFECTIVO:</b>
-💰 <b>${_fmt((double.tryParse(_ventaController.text) ?? 0) - _totalSantander - _totalMifel - _totalEfecticar - _totalClientes - (double.tryParse(_gastosController.text) ?? 0))}</b>
+💰 <b>${_fmt((double.tryParse(_ventaController.text) ?? 0) - _totalSantander - _totalMifel - _totalMonedero - _totalClientes - (double.tryParse(_gastosController.text) ?? 0))}</b>
 ''';
 
     await _corteTelegram.sendMessage(mensaje);
@@ -539,7 +559,9 @@ class _DatoCorteState extends State<DatoCorte> {
                     subtitle: Text(_fmt(_totalSantander)),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: _guardando ? null : _editarSantander,
+                      onPressed: _guardando
+                          ? null
+                          : () => _editarDocumentos('Santander'),
                     ),
                   ),
                 ),
@@ -549,17 +571,20 @@ class _DatoCorteState extends State<DatoCorte> {
                     subtitle: Text(_fmt(_totalMifel)),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: _guardando ? null : _editarMifel,
+                      onPressed:
+                          _guardando ? null : () => _editarDocumentos('Mifel'),
                     ),
                   ),
                 ),
                 Card(
                   child: ListTile(
-                    title: const Text("Efecticar"),
-                    subtitle: Text(_fmt(_totalEfecticar)),
+                    title: const Text("Efecticard"),
+                    subtitle: Text(_fmt(_totalMonedero)),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: _guardando ? null : _editarEfecticar,
+                      onPressed: _guardando
+                          ? null
+                          : () => _editarDocumentos('Monedero'),
                     ),
                   ),
                 ),
@@ -586,7 +611,8 @@ class _DatoCorteState extends State<DatoCorte> {
                     subtitle: Text(_fmt(_totalCajero)),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: _guardando ? null : _editarDepositosCajero,
+                      onPressed:
+                          _guardando ? null : () => _editarDocumentos('Cajero'),
                     ),
                   ),
                 ),

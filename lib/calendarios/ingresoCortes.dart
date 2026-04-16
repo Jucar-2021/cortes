@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
 import '../datosCorte.dart';
-import '../api/cortes/validacion_api.dart';
+import '../api/cortes/manejoCortes_api.dart';
 
 class Captura extends StatelessWidget {
   final String usuario;
@@ -60,7 +60,7 @@ class _IngresoState extends State<Ingreso> {
   late String apellidoMaterno;
 
   late final ApiService apiService;
-  late ValidacionCorteApi validacionCorteApi;
+  late ManejocortesApi validacionCorteApi;
 
   @override
   void initState() {
@@ -72,7 +72,7 @@ class _IngresoState extends State<Ingreso> {
     apellidoMaterno = widget.apellidoMaterno;
 
     apiService = ApiService();
-    validacionCorteApi = ValidacionCorteApi(apiService);
+    validacionCorteApi = ManejocortesApi(apiService);
   }
 
   @override

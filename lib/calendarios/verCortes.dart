@@ -1,4 +1,4 @@
-import 'package:cortes/administrador/listadoCortes.dart';
+import 'package:cortes/administrador/cortes/listadoCortes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

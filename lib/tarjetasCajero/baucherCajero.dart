@@ -1,39 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/doc_tar_depCaj/mifel_api.dart';
+import '../api/documentos/global_api.dart';
 
-class _BaucherItem {
-  final int? idMifel; // null = aún no existe en BD
+class _CajeroItem {
+  final int? idCajero; // null = aún no existe en BD
   final TextEditingController controller;
   final FocusNode focusNode;
 
-  _BaucherItem({
-    required this.idMifel,
+  _CajeroItem({
+    required this.idCajero,
     required this.controller,
     required this.focusNode,
   });
 }
 
-class MifelBauchersPage extends StatefulWidget {
+class RegistroDocumentosPage extends StatefulWidget {
   final int idUsuario;
   final String fecha; // "dd/MM/yyyy"
   final String producto; // compatibilidad con tu llamada actual
+  final String banco;
 
-  const MifelBauchersPage({
+  const RegistroDocumentosPage({
     super.key,
     required this.idUsuario,
     required this.fecha,
     required String user,
     required this.producto, // compatibilidad con tu llamada actual
+    required this.banco,
   });
 
   @override
-  State<MifelBauchersPage> createState() => _MifelBauchersPageState();
+  State<RegistroDocumentosPage> createState() => _RegistroDocumentosPageState();
 }
 
-class _MifelBauchersPageState extends State<MifelBauchersPage> {
-  final List<_BaucherItem> _items = [];
+class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
+  final List<_CajeroItem> _items = [];
 
   double _total = 0;
   bool _cargando = true;
@@ -42,16 +44,19 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
   bool _yaExistia = false; // controla "Guardar" vs "Actualizar"
   bool _guardando = false; // overlay "Registrando vouchers..."
 
+  late final String banco; // ejemplo de banco, ajustar según sea necesario
+
   // ===================== API & USERAPI =====================
   late final ApiService apiService;
-  late final MifelApi mifelApi;
+  late final BancosApi cajeroApi;
 
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
+    banco = widget.banco;
     apiService = ApiService();
-    mifelApi = MifelApi(apiService);
+    cajeroApi = BancosApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -64,17 +69,17 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
     super.dispose();
   }
 
-  _BaucherItem _nuevoItemVacio() {
-    return _BaucherItem(
-      idMifel: null,
+  _CajeroItem _nuevoItemVacio() {
+    return _CajeroItem(
+      idCajero: null,
       controller: TextEditingController(),
       focusNode: FocusNode(),
     );
   }
 
-  _BaucherItem _itemDesdeBD({required int idMifel, required double importe}) {
-    return _BaucherItem(
-      idMifel: idMifel,
+  _CajeroItem _itemDesdeBD({required int idCajero, required double importe}) {
+    return _CajeroItem(
+      idCajero: idCajero,
       controller: TextEditingController(text: importe.toStringAsFixed(2)),
       focusNode: FocusNode(),
     );
@@ -83,10 +88,11 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
   // ===================== CARGA INICIAL =====================
   Future<void> _cargarDatosIniciales() async {
     try {
-      final rows = await mifelApi.obtenerTarjetasMifel(
+      final rows = await cajeroApi.obtenerDatos(
         idUsuario: widget.idUsuario,
         fecha: widget.fecha,
         producto: widget.producto, // compatibilidad con tu llamada actual
+        banco: banco, // ejemplo de banco, ajustar según sea necesario
       );
 
       if (!mounted) return;
@@ -102,9 +108,9 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
         _yaExistia = true;
 
         for (final r in rows) {
-          final idMifel = r['idMifel'] as int;
+          final idCajero = r['id'] as int;
           final importe = (r['importe'] as num).toDouble();
-          _items.add(_itemDesdeBD(idMifel: idMifel, importe: importe));
+          _items.add(_itemDesdeBD(idCajero: idCajero, importe: importe));
         }
       } else {
         _yaExistia = false;
@@ -116,7 +122,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
       _recalcularTotal();
     } catch (e) {
       if (!mounted) return;
-      _errorCarga = 'Error al cargar bauchers: $e';
+      _errorCarga = 'Error al cargar cajeros: $e';
     } finally {
       if (!mounted) return;
       setState(() => _cargando = false);
@@ -176,20 +182,22 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
 
   // ===================== GUARDAR / ACTUALIZAR =====================
   Future<void> _guardarNuevo(List<double> importes) async {
-    await mifelApi.registrarTarjetasMifel(
+    await cajeroApi.registrarDatos(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
       producto: widget.producto, // compatibilidad con tu llamada actual
+      banco: banco, // ejemplo de banco, ajustar según sea necesario
     );
   }
 
   Future<void> _actualizar(List<double> importes) async {
-    await mifelApi.actualizarTarjetasMifel(
+    await cajeroApi.actualizarDatos(
       idUsuario: widget.idUsuario,
       fecha: widget.fecha,
       importes: importes,
       producto: widget.producto, // compatibilidad con tu llamada actual
+      banco: banco, // ejemplo de banco, ajustar según sea necesario
     );
   }
 
@@ -202,7 +210,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
 
     final importes = _obtenerImportesValidos();
 
-    // NUEVO: si no hay importes, regresar sin pedir nada
+    // si no hay importes, regresar sin pedir nada
     if (importes.isEmpty) {
       Navigator.pop<double>(context, _total);
       return;
@@ -227,7 +235,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
       setState(() => _guardando = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al registrar vouchers: $e')),
+        SnackBar(content: Text('Error al registrar depósitos: $e')),
       );
     }
   }
@@ -244,7 +252,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
     if (esUltimoYVacio) return;
 
     // Si no existe en BD aún, solo quítalo de la lista
-    if (item.idMifel == null) {
+    if (item.idCajero == null) {
       setState(() {
         item.controller.dispose();
         item.focusNode.dispose();
@@ -256,7 +264,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
     }
 
     try {
-      await mifelApi.eliminarTarjetaMifel(item.idMifel!);
+      await cajeroApi.eliminarDatos(id: item.idCajero!, banco: banco);
 
       if (!mounted) return;
 
@@ -268,7 +276,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
       });
 
       // si ya no hay registros reales en BD, cambia a Guardar
-      final quedanReales = _items.any((x) => x.idMifel != null);
+      final quedanReales = _items.any((x) => x.idCajero != null);
       _yaExistia = quedanReales;
 
       _recalcularTotal();
@@ -287,26 +295,64 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
     return _currencyFormat.format(valor);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_errorCarga != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorCarga!)),
+  _titulo(String banco) {
+    switch (banco) {
+      case 'Cajero':
+        return Text(
+          'Depósitos cajero',
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 251, 113, 0)),
         );
-      });
-      _errorCarga = null;
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
+      case 'Santander':
+        return Text(
+          '♨️ Bauchers Santander',
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 226, 28, 14)),
+        );
+      case 'Mifel':
+        return Text(
           'Mifel',
           style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(255, 10, 92, 216)),
-        ),
+        );
+      case 'Monedero':
+        return Text(
+          'Efecticard',
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 251, 113, 0)),
+        );
+      default:
+        return 'Depósitos $banco';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_errorCarga != null) {
+      final msg = _errorCarga; // copia local
+
+      if (msg != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg)),
+          );
+        });
+        _errorCarga = null;
+      }
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: _titulo(banco), // ejemplo de banco, ajustar según sea necesario
         centerTitle: true,
       ),
       body: _cargando
@@ -318,8 +364,8 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
                   child: Column(
                     children: [
                       const Text(
-                        'Ingresa los importes de los bauchers.\n'
-                        'Presiona "Siguiente" para brincar al siguiente campo.',
+                        'Ingresa los importes de tus comprobantes.\n'
+                        'Presiona "Siguiente" para pasar al siguiente campo.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -381,7 +427,6 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          // ignore: deprecated_member_use
                           color: Colors.blueAccent.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -400,8 +445,8 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.save),
                           label: Text(_yaExistia
-                              ? 'Actualizar bauchers'
-                              : 'Guardar bauchers'),
+                              ? 'Actualizar depósitos'
+                              : 'Guardar depósitos'),
                           onPressed: _guardando ? null : _guardar,
                         ),
                       ),
@@ -428,7 +473,7 @@ class _MifelBauchersPageState extends State<MifelBauchersPage> {
                               CircularProgressIndicator(),
                               SizedBox(width: 14),
                               Text(
-                                'Registrando vouchers...',
+                                'Registrando depósitos...',
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w600),
                               ),

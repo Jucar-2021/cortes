@@ -1,18 +1,20 @@
 import '../consumoPHP.dart';
 
-class SantanderApi {
+class BancosApi {
   final ApiService api;
-  SantanderApi(this.api);
+  BancosApi(this.api);
 
-  Future<List<Map<String, dynamic>>> obtenerTarjetasSantander({
+  Future<List<Map<String, dynamic>>> obtenerDatos({
     required int idUsuario,
     required String fecha,
     required String producto,
+    required String banco,
   }) async {
-    final res = await api.postJson('Santander/obtener.php', {
+    final res = await api.postJson('TarjetasCajero/obtener.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
+      'banco': banco,
     });
 
     final data = res['data'];
@@ -24,40 +26,47 @@ class SantanderApi {
     }
   }
 
-  // registro de targetas santander
-  Future<void> registrarTarjetasSantander({
+  // registro de bancos
+  Future<void> registrarDatos({
     required int idUsuario,
     required String fecha,
     required List<double> importes,
     required String producto,
+    required String banco,
   }) async {
-    await api.postJson('Santander/registrar.php', {
+    await api.postJson('TarjetasCajero/registrar.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
       'importes': importes,
+      'banco': banco,
     });
   }
 
-  // Actualizacion de tarjeta santander
-  Future<void> actualizarTarjetasSantander({
+  // Actualizacion de datos
+  Future<void> actualizarDatos({
     required int idUsuario,
     required String fecha,
     required List<double> importes,
     required String producto,
+    required String banco,
   }) async {
-    await api.postJson('Santander/actualizar.php', {
+    await api.postJson('TarjetasCajero/actualizar.php', {
       'idUsuario': idUsuario,
       'fecha': fecha,
       'producto': producto,
       'importes': importes,
+      'banco': banco,
     });
   }
 
-  // Eliminacion de tarjeta santander
-  Future<void> eliminarTarjetaSantander(int idSantander) async {
-    await api.postJson('Santander/eliminar.php', {
-      'idSantander': idSantander,
+  // Eliminacion de datos
+  Future<void> eliminarDatos({required int id, required String banco}) async {
+    print('Eliminando tarjeta TarjetasCajero con id: $id');
+    print(' Banco: $banco');
+    await api.postJson('TarjetasCajero/eliminar.php', {
+      'id': id,
+      'banco': banco,
     });
   }
 }
