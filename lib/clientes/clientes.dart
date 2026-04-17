@@ -324,8 +324,11 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '$razonSocial',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              razonSocial,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -336,100 +339,191 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Importes de cargas: $razonSocial.',
-                        textAlign: TextAlign.center,
+                Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Importes de cargas: $razonSocial.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Expanded(
+                              child: ListView.builder(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                itemCount: _items.length,
+                                itemBuilder: (context, index) {
+                                  final item = _items[index];
+
+                                  final esUltimo = index == _items.length - 1;
+                                  final action = esUltimo
+                                      ? TextInputAction.done
+                                      : TextInputAction.next;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: item.controller,
+                                            focusNode: item.focusNode,
+                                            enabled: !_guardando,
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(
+                                              decimal: true,
+                                            ),
+                                            textInputAction: action,
+                                            decoration: InputDecoration(
+                                              labelText: 'Baucher ${index + 1}',
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 14,
+                                                vertical: 14,
+                                              ),
+                                            ),
+                                            onChanged: (value) =>
+                                                _onChangedCampo(index, value),
+                                            onSubmitted: (_) =>
+                                                _onSubmittedCampo(index),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withOpacity(0.08),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Focus(
+                                            canRequestFocus: false,
+                                            skipTraversal: true,
+                                            child: IconButton(
+                                              tooltip: 'Eliminar',
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: _guardando
+                                                  ? null
+                                                  : () =>
+                                                      _eliminarRegistro(index),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _items.length,
-                          itemBuilder: (context, index) {
-                            final item = _items[index];
-
-                            final esUltimo = index == _items.length - 1;
-                            final action = esUltimo
-                                ? TextInputAction.done
-                                : TextInputAction.next;
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.fromLTRB(
+                          12,
+                          10,
+                          12,
+                          MediaQuery.of(context).viewPadding.bottom > 0
+                              ? 12
+                              : 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 192, 234, 255),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color.fromARGB(255, 2, 92, 219)
+                                      .withOpacity(0.20),
+                                ),
+                              ),
                               child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: item.controller,
-                                      focusNode: item.focusNode,
-                                      enabled: !_guardando,
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                              decimal: true),
-                                      textInputAction: action,
-                                      decoration: InputDecoration(
-                                        labelText: 'Baucher ${index + 1}',
-                                        border: const OutlineInputBorder(),
-                                      ),
-                                      onChanged: (value) =>
-                                          _onChangedCampo(index, value),
-                                      onSubmitted: (_) =>
-                                          _onSubmittedCampo(index),
+                                  const Text(
+                                    'TOTAL',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Focus(
-                                    canRequestFocus: false,
-                                    skipTraversal: true,
-                                    child: IconButton(
-                                      tooltip: 'Eliminar',
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.red),
-                                      onPressed: _guardando
-                                          ? null
-                                          : () => _eliminarRegistro(index),
+                                  Text(
+                                    _fmt(_total),
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(255, 2, 92, 219),
                                     ),
                                   ),
                                 ],
                               ),
-                            );
-                          },
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.save),
+                                label: Text(
+                                  _yaExistia
+                                      ? 'Actualizar importes'
+                                      : 'Guardar clientes',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 2,
+                                ),
+                                onPressed: _guardando ? null : _guardar,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 192, 234, 255),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'TOTAL: ${_fmt(_total)}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 2, 92, 219),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.save),
-                          label: Text(_yaExistia
-                              ? 'Actualizar importes'
-                              : 'Guardar clientes'),
-                          onPressed: _guardando ? null : _guardar,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-
-                // ================= OVERLAY "REGISTRANDO..." =================
                 if (_guardando)
                   Positioned.fill(
                     child: Container(
@@ -437,7 +531,9 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
                       child: Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 16),
+                            horizontal: 18,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(14),
@@ -450,7 +546,9 @@ class _ClientesCapturaPageState extends State<ClientesCapturaPage> {
                               Text(
                                 'Registrando clientes...',
                                 style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w600),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),

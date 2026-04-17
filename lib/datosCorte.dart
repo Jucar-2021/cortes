@@ -509,216 +509,335 @@ class _DatoCorteState extends State<DatoCorte> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFF1565C0),
+        foregroundColor: Colors.white,
+        elevation: 2,
+        centerTitle: true,
         title: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               "$nombre $apellidoPaterno $apellidoMaterno",
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
             ),
-            Text("Captura de corte $producto con fecha:",
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            Text(_formatoFecha(fecha),
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 2),
+            Text(
+              "Captura de corte $producto con fecha:",
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              _formatoFecha(fecha),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
-        centerTitle: true,
       ),
+      backgroundColor: const Color(0xFFF5F7FB),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text("Venta del día",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                TextField(
-                  controller: _ventaController,
-                  enabled: !_guardando,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: "Venta del día",
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) async {
-                    await _saveString('ventaDia', value);
-
-                    _recalcularTotal();
-                  },
-                ),
-                const SizedBox(height: 20),
-                const Text("Tarjetas",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Card(
-                  child: ListTile(
-                    title: const Text("Santander"),
-                    subtitle: Text(_fmt(_totalSantander)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: _guardando
-                          ? null
-                          : () => _editarDocumentos('Santander'),
-                    ),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    title: const Text("Mifel"),
-                    subtitle: Text(_fmt(_totalMifel)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed:
-                          _guardando ? null : () => _editarDocumentos('Mifel'),
-                    ),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    title: const Text("Efecticard"),
-                    subtitle: Text(_fmt(_totalMonedero)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: _guardando
-                          ? null
-                          : () => _editarDocumentos('Monedero'),
-                    ),
-                  ),
-                ),
-                const Text("Clientes",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Card(
-                  child: ListTile(
-                    title: const Text("Total clientes"),
-                    subtitle: Text(_fmt(_totalClientes)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: _guardando ? null : _editarClientes,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text("Otros movimientos",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Card(
-                  child: ListTile(
-                    title: const Text("Depósitos en cajero"),
-                    subtitle: Text(_fmt(_totalCajero)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed:
-                          _guardando ? null : () => _editarDocumentos('Cajero'),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _buzonController,
-                  enabled: !_guardando,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: "Buzón",
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) async {
-                    await _saveString('buzon', value);
-                    _recalcularTotal();
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _gastosController,
-                  enabled: !_guardando,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: "Gastos",
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) async {
-                    await _saveString('gastos', value);
-                    _recalcularTotal();
-                  },
-                ),
-                const SizedBox(height: 20),
-                const Text("Detalle de efectivo entregado",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                TextField(
-                  controller: _billetesController,
-                  enabled: !_guardando,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: "Total Billetes",
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) async {
-                    await _saveString('billetes', value);
-                    _recalcularTotal();
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _monedasController,
-                  enabled: !_guardando,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: "Total Monedas",
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) async {
-                    await _saveString('monedas', value);
-                    _recalcularTotal();
-                  },
-                ),
-                const SizedBox(height: 30),
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: totalFinal > 0
-                        ? Colors.yellowAccent
-                        : Colors.tealAccent,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    totalFinal < 0
-                        ? "Diferencia a entregar: ${_fmt(totalFinal)} (SOBRANTE)"
-                        : "Diferencia a entregar: ${_fmt(totalFinal)}",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      color: totalFinal > 0 ? Colors.red : Colors.blue,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _guardando ? null : _onGuardarPressed,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text("Guardar Corte"),
-                      SizedBox(width: 8),
-                      Icon(Icons.save_rounded),
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildSectionTitle("Venta del día"),
+                      _buildCustomField(
+                        controller: _ventaController,
+                        enabled: !_guardando,
+                        label: "Venta del día",
+                        onChanged: (value) async {
+                          await _saveString('ventaDia', value);
+                          _recalcularTotal();
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                      _buildSectionTitle("Tarjetas"),
+                      _buildResumenCard(
+                        titulo: "Santander",
+                        valor: _fmt(_totalSantander),
+                        icono: Icons.credit_card,
+                        onTap: _guardando
+                            ? null
+                            : () => _editarDocumentos('Santander'),
+                      ),
+                      _buildResumenCard(
+                        titulo: "Mifel",
+                        valor: _fmt(_totalMifel),
+                        icono: Icons.credit_card,
+                        onTap: _guardando
+                            ? null
+                            : () => _editarDocumentos('Mifel'),
+                      ),
+                      _buildResumenCard(
+                        titulo: "Efecticard",
+                        valor: _fmt(_totalMonedero),
+                        icono: Icons.credit_card,
+                        onTap: _guardando
+                            ? null
+                            : () => _editarDocumentos('Monedero'),
+                      ),
+                      const SizedBox(height: 18),
+                      _buildSectionTitle("Clientes"),
+                      _buildResumenCard(
+                        titulo: "Total clientes",
+                        valor: _fmt(_totalClientes),
+                        icono: Icons.people_alt_outlined,
+                        onTap: _guardando ? null : _editarClientes,
+                      ),
+                      const SizedBox(height: 18),
+                      _buildSectionTitle("Otros movimientos"),
+                      _buildResumenCard(
+                        titulo: "Depósitos en cajero",
+                        valor: _fmt(_totalCajero),
+                        icono: Icons.account_balance,
+                        onTap: _guardando
+                            ? null
+                            : () => _editarDocumentos('Cajero'),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildCustomField(
+                        controller: _buzonController,
+                        enabled: !_guardando,
+                        label: "Buzón",
+                        onChanged: (value) async {
+                          await _saveString('buzon', value);
+                          _recalcularTotal();
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      _buildCustomField(
+                        controller: _gastosController,
+                        enabled: !_guardando,
+                        label: "Gastos",
+                        onChanged: (value) async {
+                          await _saveString('gastos', value);
+                          _recalcularTotal();
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                      _buildSectionTitle("Detalle de efectivo entregado"),
+                      _buildCustomField(
+                        controller: _billetesController,
+                        enabled: !_guardando,
+                        label: "Total Billetes",
+                        onChanged: (value) async {
+                          await _saveString('billetes', value);
+                          _recalcularTotal();
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildCustomField(
+                        controller: _monedasController,
+                        enabled: !_guardando,
+                        label: "Total Monedas",
+                        onChanged: (value) async {
+                          await _saveString('monedas', value);
+                          _recalcularTotal();
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 18,
+                        ),
+                        decoration: BoxDecoration(
+                          color: totalFinal < 0
+                              ? const Color(0xFFE8F5E9)
+                              : const Color(0xFFFFF3E0),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: totalFinal < 0
+                                ? const Color(0xFF43A047).withOpacity(0.30)
+                                : const Color(0xFFFB8C00).withOpacity(0.30),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Diferencia a entregar",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              totalFinal < 0
+                                  ? "${_fmt(totalFinal)} (SOBRANTE)"
+                                  : _fmt(totalFinal),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: totalFinal < 0
+                                    ? const Color(0xFF2E7D32)
+                                    : const Color(0xFFEF6C00),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
-              ],
-            ),
+              ),
+              SafeArea(
+                top: false,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(
+                    12,
+                    10,
+                    12,
+                    MediaQuery.of(context).viewPadding.bottom > 0 ? 12 : 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton.icon(
+                      onPressed: _guardando ? null : _onGuardarPressed,
+                      icon: const Icon(Icons.save_rounded),
+                      label: const Text(
+                        "Guardar Corte",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1565C0),
+                        foregroundColor: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           if (_guardando) _overlayGuardando(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String titulo) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        titulo,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF0D47A1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomField({
+    required TextEditingController controller,
+    required bool enabled,
+    required String label,
+    required ValueChanged<String> onChanged,
+  }) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: Colors.blueGrey.withOpacity(0.25),
+          ),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+          borderSide: BorderSide(
+            color: Color(0xFF1565C0),
+            width: 2,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 16,
+        ),
+      ),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildResumenCard({
+    required String titulo,
+    required String valor,
+    required IconData icono,
+    required VoidCallback? onTap,
+  }) {
+    return Card(
+      color: Colors.white,
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFFE3F2FD),
+          child: Icon(icono, color: const Color(0xFF1565C0)),
+        ),
+        title: Text(
+          titulo,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          valor,
+          style: const TextStyle(
+            fontSize: 15,
+            color: Colors.black87,
+          ),
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.edit, color: Color(0xFF1565C0)),
+          onPressed: onTap,
+        ),
       ),
     );
   }

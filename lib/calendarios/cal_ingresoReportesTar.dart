@@ -1,24 +1,24 @@
-import '/administrador/cortes/listadoCortes.dart';
+import '../tarjetasCajero/ingresoTirasTarje.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ViewCortes extends StatelessWidget {
-  const ViewCortes({super.key});
+class ViewReportes extends StatelessWidget {
+  const ViewReportes({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Cortes();
+    return const CalIngresoReportesTar();
   }
 }
 
-class Cortes extends StatefulWidget {
-  const Cortes({super.key});
+class CalIngresoReportesTar extends StatefulWidget {
+  const CalIngresoReportesTar({super.key});
 
   @override
-  State<Cortes> createState() => _CortesState();
+  State<CalIngresoReportesTar> createState() => _CalIngresoReportesTarState();
 }
 
-class _CortesState extends State<Cortes> {
+class _CalIngresoReportesTarState extends State<CalIngresoReportesTar> {
   final TextEditingController _fechaSelec = TextEditingController();
   final TextEditingController _fechaVisual = TextEditingController();
   DateTime? _fechaSeleccionada;
@@ -73,7 +73,7 @@ class _CortesState extends State<Cortes> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ListadoCortes(
+        builder: (context) => IngresoReportes(
           fecha: fecha,
         ),
       ),
@@ -100,7 +100,7 @@ class _CortesState extends State<Cortes> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             Text(
-              "Bienvenido, selecciona la fecha de cortes a visualizar",
+              "Ingresa la fecha para ingresar los reportes",
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ],

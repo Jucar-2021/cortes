@@ -268,38 +268,63 @@ class _ListadoclientesState extends State<Listadoclientes> {
                   },
                 ),
               ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 89, 138, 224),
-                  border: Border(
-                    top: BorderSide(color: Colors.black12),
+              SafeArea(
+                top: false,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(
+                    12,
+                    12,
+                    12,
+                    MediaQuery.of(context).viewPadding.bottom > 0 ? 12 : 10,
                   ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'TOTAL GENERAL: ${_fmt(totalGeneral)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 89, 138, 224),
+                    border: const Border(
+                      top: BorderSide(color: Colors.black12),
                     ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context, totalGeneral);
-                        },
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Regresar'),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, -2),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'TOTAL GENERAL: ${_fmt(totalGeneral)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context, totalGeneral);
+                          },
+                          icon: const Icon(Icons.arrow_back),
+                          label: const Text(
+                            'Regresar',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

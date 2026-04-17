@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/documentos/consultas_api.dart';
+import '../api/documentos/consultaDocSumados_api.dart';
 
 class ReporteTarjetas extends StatefulWidget {
   const ReporteTarjetas({
@@ -135,11 +135,11 @@ class _ReporteTarjetasState extends State<ReporteTarjetas> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Inicio: ${widget.fechaini}',
+                    'Inicio: ${_formatoFecha2(widget.fechaini)}',
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                   ),
                   Text(
-                    'Fin: ${widget.fechafin}',
+                    'Fin: ${_formatoFecha2(widget.fechafin)}',
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                   ),
                 ],
@@ -253,7 +253,9 @@ class _ReporteTarjetasState extends State<ReporteTarjetas> {
                                             cells: [
                                               DataCell(
                                                 Text(
-                                                  '${item['fecha'] ?? ''}',
+                                                  _formatoFecha(
+                                                    '${item['fecha'] ?? ''}',
+                                                  ),
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.w600,
                                                   ),
@@ -349,5 +351,35 @@ class _ReporteTarjetasState extends State<ReporteTarjetas> {
         ),
       ),
     );
+  }
+
+  String _formatoFecha(String fecha) {
+    try {
+      final partes = fecha.split('-');
+      if (partes.length != 3) return fecha;
+
+      final an = partes[0];
+      final mes = partes[1];
+      final dia = partes[2];
+
+      return '$dia-$mes-$an';
+    } catch (e) {
+      return fecha;
+    }
+  }
+
+  String _formatoFecha2(String fecha) {
+    try {
+      final partes = fecha.split('/');
+      if (partes.length != 3) return fecha;
+
+      final an = partes[0];
+      final mes = partes[1];
+      final dia = partes[2];
+
+      return '$dia/$mes/$an';
+    } catch (e) {
+      return fecha;
+    }
   }
 }

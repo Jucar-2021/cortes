@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
-import '../api/documentos/registro_api.dart';
+import '../api/documentos/registroDoc_api.dart';
 
 class _CajeroItem {
-  final int? idCajero; // null = aún no existe en BD
+  final int? idRegistros; // null = aún no existe en BD
   final TextEditingController controller;
   final FocusNode focusNode;
 
   _CajeroItem({
-    required this.idCajero,
+    required this.idRegistros,
     required this.controller,
     required this.focusNode,
   });
@@ -71,15 +71,16 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
 
   _CajeroItem _nuevoItemVacio() {
     return _CajeroItem(
-      idCajero: null,
+      idRegistros: null,
       controller: TextEditingController(),
       focusNode: FocusNode(),
     );
   }
 
-  _CajeroItem _itemDesdeBD({required int idCajero, required double importe}) {
+  _CajeroItem _itemDesdeBD(
+      {required int idRegistros, required double importe}) {
     return _CajeroItem(
-      idCajero: idCajero,
+      idRegistros: idRegistros,
       controller: TextEditingController(text: importe.toStringAsFixed(2)),
       focusNode: FocusNode(),
     );
@@ -108,9 +109,9 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
         _yaExistia = true;
 
         for (final r in rows) {
-          final idCajero = r['id'] as int;
+          final idRegistros = r['id'] as int;
           final importe = (r['importe'] as num).toDouble();
-          _items.add(_itemDesdeBD(idCajero: idCajero, importe: importe));
+          _items.add(_itemDesdeBD(idRegistros: idRegistros, importe: importe));
         }
       } else {
         _yaExistia = false;
@@ -122,7 +123,7 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
       _recalcularTotal();
     } catch (e) {
       if (!mounted) return;
-      _errorCarga = 'Error al cargar cajeros: $e';
+      _errorCarga = 'Error al cargar registros: $e';
     } finally {
       if (!mounted) return;
       setState(() => _cargando = false);
@@ -252,7 +253,7 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
     if (esUltimoYVacio) return;
 
     // Si no existe en BD aún, solo quítalo de la lista
-    if (item.idCajero == null) {
+    if (item.idRegistros == null) {
       setState(() {
         item.controller.dispose();
         item.focusNode.dispose();
@@ -264,7 +265,7 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
     }
 
     try {
-      await cajeroApi.eliminarDatos(id: item.idCajero!, banco: banco);
+      await cajeroApi.eliminarDatos(id: item.idRegistros!, banco: banco);
 
       if (!mounted) return;
 
@@ -276,7 +277,7 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
       });
 
       // si ya no hay registros reales en BD, cambia a Guardar
-      final quedanReales = _items.any((x) => x.idCajero != null);
+      final quedanReales = _items.any((x) => x.idRegistros != null);
       _yaExistia = quedanReales;
 
       _recalcularTotal();
@@ -352,106 +353,205 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: _titulo(banco), // ejemplo de banco, ajustar según sea necesario
+        title: _titulo(banco),
         centerTitle: true,
       ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Ingresa los importes de tus comprobantes.\n'
-                        'Presiona "Siguiente" para pasar al siguiente campo.',
-                        textAlign: TextAlign.center,
+                Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Ingresa los importes de tus comprobantes.\n'
+                              'Presiona "Siguiente" para pasar al siguiente campo.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Expanded(
+                              child: ListView.builder(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                itemCount: _items.length,
+                                itemBuilder: (context, index) {
+                                  final item = _items[index];
+
+                                  final esUltimo = index == _items.length - 1;
+                                  final action = esUltimo
+                                      ? TextInputAction.done
+                                      : TextInputAction.next;
+
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 6),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: item.controller,
+                                            focusNode: item.focusNode,
+                                            enabled: !_guardando,
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(
+                                                decimal: true),
+                                            textInputAction: action,
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  'Comprobante ${index + 1}',
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 14,
+                                                vertical: 14,
+                                              ),
+                                            ),
+                                            onChanged: (value) =>
+                                                _onChangedCampo(index, value),
+                                            onSubmitted: (_) =>
+                                                _onSubmittedCampo(index),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withOpacity(0.08),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Focus(
+                                            canRequestFocus: false,
+                                            skipTraversal: true,
+                                            child: IconButton(
+                                              tooltip: 'Eliminar',
+                                              icon: const Icon(
+                                                Icons.delete_forever_outlined,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: _guardando
+                                                  ? null
+                                                  : () =>
+                                                      _eliminarRegistro(index),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _items.length,
-                          itemBuilder: (context, index) {
-                            final item = _items[index];
+                    ),
 
-                            final esUltimo = index == _items.length - 1;
-                            final action = esUltimo
-                                ? TextInputAction.done
-                                : TextInputAction.next;
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
+                    // ===== FOOTER FIJO Y SEGURO =====
+                    SafeArea(
+                      top: false,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.fromLTRB(
+                          12,
+                          10,
+                          12,
+                          MediaQuery.of(context).viewPadding.bottom > 0
+                              ? 12
+                              : 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.blueAccent.withOpacity(0.15),
+                                    Colors.blueAccent.withOpacity(0.05),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: Colors.blueAccent.withOpacity(0.25),
+                                ),
+                              ),
                               child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: item.controller,
-                                      focusNode: item.focusNode,
-                                      enabled: !_guardando,
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                              decimal: true),
-                                      textInputAction: action,
-                                      decoration: InputDecoration(
-                                        labelText: 'Baucher ${index + 1}',
-                                        border: const OutlineInputBorder(),
-                                      ),
-                                      onChanged: (value) =>
-                                          _onChangedCampo(index, value),
-                                      onSubmitted: (_) =>
-                                          _onSubmittedCampo(index),
+                                  const Text(
+                                    'TOTAL',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Focus(
-                                    canRequestFocus: false,
-                                    skipTraversal: true,
-                                    child: IconButton(
-                                      tooltip: 'Eliminar',
-                                      icon: const Icon(
-                                          Icons.delete_forever_outlined,
-                                          color: Colors.red),
-                                      onPressed: _guardando
-                                          ? null
-                                          : () => _eliminarRegistro(index),
+                                  Text(
+                                    _fmt(_total),
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
                                     ),
                                   ),
                                 ],
                               ),
-                            );
-                          },
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.save),
+                                label: Text(
+                                  _yaExistia
+                                      ? 'Actualizar depósitos'
+                                      : 'Guardar depósitos',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 2,
+                                ),
+                                onPressed: _guardando ? null : _guardar,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'TOTAL: ${_fmt(_total)}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.save),
-                          label: Text(_yaExistia
-                              ? 'Actualizar depósitos'
-                              : 'Guardar depósitos'),
-                          onPressed: _guardando ? null : _guardar,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
 
                 // ================= OVERLAY "REGISTRANDO..." =================
@@ -475,7 +575,9 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
                               Text(
                                 'Registrando depósitos...',
                                 style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w600),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
