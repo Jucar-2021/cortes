@@ -102,7 +102,7 @@ class HomeAdmin extends StatelessWidget {
                   _adminButton(
                     context,
                     icon: Icons.credit_card_rounded,
-                    label: "Reportes de\nTarjetas",
+                    label: "Cobros con\nTarjetas",
                     color: const Color(0xFFE53935),
                     onTap: () {
                       Navigator.push(
@@ -116,7 +116,7 @@ class HomeAdmin extends StatelessWidget {
                   _adminButton(
                     context,
                     icon: Icons.edit_note_rounded,
-                    label: "Capturar Reportes\nde Tarjetas",
+                    label: "Capturar Reportes\nde Terminales",
                     color: const Color(0xFFFB8C00),
                     onTap: () {
                       Navigator.push(

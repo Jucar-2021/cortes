@@ -3,12 +3,12 @@ import 'package:intl/intl.dart';
 import '../api/consumoPHP.dart';
 import '../api/documentos/registroDoc_api.dart';
 
-class _CajeroItem {
+class _DocumentoItem {
   final int? idRegistros; // null = aún no existe en BD
   final TextEditingController controller;
   final FocusNode focusNode;
 
-  _CajeroItem({
+  _DocumentoItem({
     required this.idRegistros,
     required this.controller,
     required this.focusNode,
@@ -35,7 +35,7 @@ class RegistroDocumentosPage extends StatefulWidget {
 }
 
 class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
-  final List<_CajeroItem> _items = [];
+  final List<_DocumentoItem> _items = [];
 
   double _total = 0;
   bool _cargando = true;
@@ -47,16 +47,14 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
   late final String banco; // ejemplo de banco, ajustar según sea necesario
 
   // ===================== API & USERAPI =====================
-  late final ApiService apiService;
-  late final BancosApi cajeroApi;
+  final ApiService apiService = ApiService();
+  late final BancosApi cajeroApi = BancosApi(apiService);
 
   @override
   void initState() {
     super.initState();
     _items.add(_nuevoItemVacio());
     banco = widget.banco;
-    apiService = ApiService();
-    cajeroApi = BancosApi(apiService);
     _cargarDatosIniciales();
   }
 
@@ -69,17 +67,17 @@ class _RegistroDocumentosPageState extends State<RegistroDocumentosPage> {
     super.dispose();
   }
 
-  _CajeroItem _nuevoItemVacio() {
-    return _CajeroItem(
+  _DocumentoItem _nuevoItemVacio() {
+    return _DocumentoItem(
       idRegistros: null,
       controller: TextEditingController(),
       focusNode: FocusNode(),
     );
   }
 
-  _CajeroItem _itemDesdeBD(
+  _DocumentoItem _itemDesdeBD(
       {required int idRegistros, required double importe}) {
-    return _CajeroItem(
+    return _DocumentoItem(
       idRegistros: idRegistros,
       controller: TextEditingController(text: importe.toStringAsFixed(2)),
       focusNode: FocusNode(),
